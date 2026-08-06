@@ -1,0 +1,81 @@
+---
+# Case L -- source already uses `>-`.
+# The pass converts plain->folded but leaves existing FoldedNodes alone,
+# even if the wrap boundaries aren't optimal.
+already_folded: >-
+  This scalar is already emitted as folded style by the author;
+  the pass leaves it untouched even though the wrap boundaries
+  may not be optimal.
+
+# Case K -- exactly at the line width.  Must stay plain (no overflow).
+at_line_width: aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaaaaaaaaa aaa
+
+# Case A -- basic long single-line description.
+# Should fold to `>-` at full+ because it exceeds the line width, has plenty of
+# single-space break points, and no leading/trailing whitespace.
+basic_long: >-
+  This is a very long single-line description that clearly exceeds the line width and should be broken into multiple
+  lines to improve readability of the YAML file.
+
+# Case F -- content with a colon in the middle.
+# Colons inside plain scalars work fine as long as they aren't followed by
+# whitespace; the fold-to-`>-` variant is unambiguous either way.
+interior_colon: >-
+  This: is a long description containing a colon that continues past the line width to force the fold logic to kick in.
+
+# Case B -- interior double-space run.
+# The `hello  world` (two spaces) must NOT be split across a wrap boundary,
+# or fold-back would collapse it to one space.  Multi-space runs stay glued.
+interior_double_space: >-
+  This is a long description that includes a hello  world double-space region which must survive intact across every
+  wrap of the folded scalar output.
+
+# Case D -- interior tab.
+# Tabs must survive fold-back verbatim (they aren't line-break folding
+# candidates). The source must be double-quoted so goccy's parser
+# actually keeps the tab -- tabs in plain scalars are dropped on parse
+# by goccy, a pre-existing quirk this pass can't work around.
+interior_tab: >-
+  This is a long description that contains a literal	tab character in the middle and continues past the line width to
+  trigger the fold.
+
+# Case E -- content starting with a dash.
+# Plain scalars can't start with `- ` (interpreted as sequence marker);
+# `>-` sidesteps that entirely, which is a happy side effect.
+leading_dash: >-
+  - but I really wanted to start with a dash and the sentence goes on and on and on and on past the line width so
+  folding is triggered
+
+# Case G -- leading whitespace.  Must stay plain.
+# YAML folded scalars use the first content line's indent as the base;
+# extra leading spaces on the value would either misparse or get eaten.
+leading_whitespace: '   three leading spaces then the description continues on and on past the line width to force the fold logic to check the guard rail.'
+
+# Case C -- adjacent multi-space near a natural wrap boundary.
+# Word before the multi-space run is long enough that a naive wrapper would
+# want to break inside the run; the algorithm must refuse and break before
+# the entire glued token instead.
+multi_space_at_wrap: >-
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  cccccccccccccccccccccccc
+
+# Case C1 -- adjacent multi-space on the far side of the wrap boundary.
+# Companion to Case C with the multi-space run placed AFTER the natural
+# wrap position rather than before it.  Wrapper must still keep the run
+# glued -- it lands on the second line together with its neighbour word,
+# not split across the boundary.
+multi_space_at_wrap1: >-
+  aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb  cccccccccccccccccccccccc
+
+# Case I -- no space characters at all.  Must stay plain.
+# Cannot wrap without introducing a break; represents URLs, hashes, long
+# identifiers.
+no_spaces: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+# Case J -- short single-line value.  Under the line width, so no reason to fold.
+short_line: This is short.
+# Case H -- trailing whitespace.  Must stay plain.
+# Folded scalars strip trailing whitespace on every content line -- there
+# is no way to encode the two trailing spaces via `>-` losslessly.
+trailing_whitespace: 'the description continues on and on past the configured line width and finishes with two trailing spaces  '
+...

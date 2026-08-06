@@ -1,0 +1,14 @@
+---
+- col1: a simple string
+  col2: 'this has a	tab'
+  col3: |-
+    this has a
+    newline
+  col4: this has a \ backslash
+  subarray:
+    - col1: a simple string
+      col2: 'this has a	tab'
+      col3: |-
+        this has a
+        newline
+      col4: this has a \ backslash

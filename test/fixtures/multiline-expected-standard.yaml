@@ -1,0 +1,7 @@
+---
+# Multiline scalars - full mode rewrites as block scalars
+
+keep3: "line1\nline2\n\n\n"  # three trailing -> |+
+strip: "line1\nline2"  # no trailing newline -> |-
+clip: "line1\nline2\n"  # one trailing newline -> |
+keep: "line1\nline2\n\n"  # two trailing -> |+

@@ -1,0 +1,91 @@
+---
+# Case A -- `|+` values sit as items of a sequence.
+# Each item's trailing newlines must survive round-trip regardless of
+# whether the block appears under a mapping key or as a sequence
+# element.
+seq_of_blocks:
+  - |+
+    content_A
+
+
+  - |+
+    content_B
+
+
+  - value
+
+---
+# Case B -- `|+` block value is anchored.
+# The anchor wrapper doesn't change what the value carries; the
+# trailing newlines still belong to the value and must be preserved.
+anchored: &anchor_a |+
+  content
+
+
+plain_after: value
+
+---
+# Case C -- the doc's last top-level entry is a sequence whose items
+# include a `|+`.  Same compensator logic that applies when the last
+# entry is a mapping containing a `|+` also applies here on the
+# sequence branch.
+tail_seq:
+  - first: |+
+      content
+
+
+    other: value
+  - second: value
+
+---
+# Case D -- `|+` value carrying the smallest keep-chomp count: two
+# trailing newlines (one blank line of trailing space).  Any smaller
+# trailing count and `|+` would have canonicalised to `|`.
+minimal_keep: |+
+  content
+
+
+...
+
+---
+# Case D2 --  `|+` canonicalise to `|`.
+remove_plus: |
+  content
+
+---
+# Case E -- two independent `|+` values in the same doc, each with
+# its own trailing newline run.  Neither block's trailing count
+# should influence the other's.
+first_keep: |+
+  content_first
+
+
+middle: value
+
+second_keep: |+
+  content_second
+
+
+tail: value
+
+---
+# Case F -- `|+` value sits three mapping levels deep.  Nesting depth
+# should not affect either the value's trailing-newline preservation
+# or the doc-end disambiguation rule.
+a:
+  b:
+    c: |+
+      content
+
+
+...
+
+---
+# Case G -- folded-scalar value carrying literal leading whitespace.
+# The `>-4` header names an explicit indent so the content lines,
+# whose actual column sits further to the right than the header's
+# base, contribute three leading spaces to each string in the value.
+# Two content lines make the effect visible.
+indent_indicator: >-4
+       first
+       second

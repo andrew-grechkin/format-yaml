@@ -1,0 +1,7 @@
+---
+# Various ways to write null
+a: null  # literal
+b: null  # tilde form
+c: null  # implicit (empty value)
+d: 'null'  # string that looks like null
+...

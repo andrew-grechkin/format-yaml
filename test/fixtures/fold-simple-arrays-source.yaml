@@ -1,0 +1,75 @@
+simple_array_should_be_folded:
+  - a
+  - "beta"
+  - 42
+  - no_quoted_or_must_be_quoted_items
+complex_array_should_stay_block:
+  - "42"
+  - has item must stay or become quoted
+  - beta
+  - 42
+  - zetta
+too_long_in_fold_array_should_stay_block:
+  - very_long_strings_in_array
+  - make_it_unfoldable
+  - because_if_folding_is_applied_to_such_array
+  - the_tail_of_this_array_will_be_beyond_the_right_boundary
+too_far_right_side_array_should_stay_block:
+  key:
+    key:
+      key:
+        key:
+          key:
+            key:
+              key:
+                key:
+                  key:
+                    key:
+                      key:
+                        key:
+                          key:
+                            key:
+                              key:
+                                key:
+                                  key:
+                                    key:
+                                      key:
+                                        key:
+                                          key:
+                                            key:
+                                              key:
+                                                key:
+                                                  key:
+                                                    key:
+                                                      key:
+                                                        key:
+                                                          key:
+                                                            key:
+                                                              key:
+                                                                key:
+                                                                  key:
+                                                                    key:
+                                                                      key:
+                                                                        key:
+                                                                          key:
+                                                                            key:
+                                                                              key:
+                                                                                key:
+                                                                                  key:
+                                                                                    key:
+                                                                                      key:
+                                                                                        key:
+                                                                                          key:
+                                                                                            key:
+                                                                                              key:
+                                                                                                key:
+                                                                                                  key:
+                                                                                                    key:
+                                                                                                      array:
+                                                                                                        - this
+                                                                                                        - array
+                                                                                                        - cannot
+                                                                                                        - be
+                                                                                                        - folded
+
+

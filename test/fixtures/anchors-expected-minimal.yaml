@@ -1,0 +1,15 @@
+---
+# Base defaults shared by every environment
+defaults: &defaults
+    timeout: 30    # request timeout, seconds
+    retries: 3
+
+# Production
+prod:
+    <<: *defaults
+    host: prod.example.com  # main prod host
+
+# Dev / staging
+adev:
+    <<: *defaults
+    host: dev.example.com

@@ -1,0 +1,100 @@
+---
+# Case A -- doc ends with `|+` carrying >=2 trailing newlines.
+# At full+: expect `...` doc-end marker inserted to disambiguate where
+# the value's trailing newlines end and the next doc boundary begins.
+top_level_keep: |+
+  content
+
+
+...
+
+---
+# Case B -- `|+` is NOT the last entry of the doc.
+# A sibling key at the same indent level terminates the block
+# unambiguously, so no `...` trigger from this `|+`.
+first_keep: |+
+  content
+
+
+sibling: value
+
+---
+# Case C -- `|+` sits at the tail of a nested mapping which itself is
+# the last entry of its doc. Walking the last-entry chain from
+# doc.Body ends at this `|+`, so ambiguity exists and full+ should
+# add `...`.
+outer:
+  inner_keep: |+
+    content
+
+
+...
+
+---
+# Case D -- `|+` is nested but a sibling entry breaks the last-entry
+# chain. The following sibling terminates the block, so no `...`
+# trigger regardless of how deep the `|+` is.
+outer:
+  first_keep: |+
+    content
+
+
+  second: value
+
+---
+# Case E -- `>+` folded block at doc end with >=2 trailing newlines.
+# Same rule applies: full+ inserts `...` to disambiguate.
+folded_end: >+
+  content
+
+
+...
+
+---
+# Case F -- `|+` carrying exactly 1 trailing newline (no blank line
+# between the content and `---`).  canonicalizeBlockScalarChomp
+# downgrades `|+` -> `|`, so by the time we consider the doc-end
+# rule there is no `|+` here.  No `...`.
+one_trailing: |
+  content
+
+---
+# Case G -- control case, plain scalar at doc end. No block scalar,
+# no ambiguity, no `...` added.
+plain_end: value
+
+---
+# Case H -- doc ends with `|-` strip chomp.  Source has multiple
+# trailing blank lines but they are NOT part of the value (`-` strips
+# every trailing newline).  No ambiguity to resolve, no `...`.
+strip_end: |-
+  content
+
+---
+# Case I -- doc ends with `|` clip chomp.  Source has multiple
+# trailing blank lines but chomp keeps EXACTLY ONE.  Value's trailing
+# count is unambiguous by rule, so no `...` needed.
+clip_end: |
+  content
+
+---
+# Case J -- doc ends with `>-` folded strip.  Same reasoning as H:
+# strip chomp, no trailing newlines in value, no ambiguity, no `...`.
+folded_strip_end: >-
+  content
+
+---
+# Case K -- doc ends with `>` folded clip.  Same reasoning as I:
+# clip chomp keeps exactly one, no ambiguity, no `...`.
+folded_clip_end: >
+  content
+
+---
+# Case L -- doc ends with `|+` and is the LAST doc in the file (no
+# following `---` at all). The ambiguity is between the value's
+# trailing newlines and EOF. Still triggers `...` at full+.
+last_doc_keep: |+
+  content
+
+
+...

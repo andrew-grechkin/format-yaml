@@ -1,0 +1,11 @@
+top_level_array1: [a, b, c]
+top_level_array2:
+- d
+- e
+- f
+container:
+  second_level_array: [A, B, C]
+  second_level_array2:
+  - D
+  - E
+  - F

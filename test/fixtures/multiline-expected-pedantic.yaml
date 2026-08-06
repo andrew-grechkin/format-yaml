@@ -1,0 +1,20 @@
+---
+# Multiline scalars - full mode rewrites as block scalars
+
+clip: |  # one trailing newline -> |
+  line1
+  line2
+
+keep: |+  # two trailing -> |+
+  line1
+  line2
+
+keep3: |+  # three trailing -> |+
+  line1
+  line2
+
+
+strip: |-  # no trailing newline -> |-
+  line1
+  line2
+...

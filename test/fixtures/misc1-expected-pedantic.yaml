@@ -1,0 +1,44 @@
+---
+arr:
+  - array:
+      - null
+      - false
+      - 42
+      - '42'
+      - 2024-01-01T00:00:00Z
+    bool: false
+    date: 2024-01-01T00:00:00Z
+    hash:
+      date: 2024-01-01T00:00:00Z
+      num: 42
+      str: '42'
+      undef: null
+    num: 42
+    str: '42'
+    text: |-
+      first line
+      line
+
+      last line
+    undef: null
+  - array:
+      - null
+      - true
+      - 42
+      - '42'
+      - 2024-01-01T00:00:00Z
+    bool: true
+    date: 2024-01-01T00:00:00Z
+    hash:
+      date: 2024-01-01T00:00:00Z
+      num: 42
+      str: '42'
+      undef: null
+    num: 42
+    str: '42'
+    text: |-
+      first line
+
+      third line
+    undef: null
+...

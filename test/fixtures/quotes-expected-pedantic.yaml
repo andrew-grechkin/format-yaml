@@ -1,0 +1,11 @@
+---
+# A grab-bag of scalar shapes, exercising the quote-stripping rule
+
+alias_like: '*foo'  # keep quotes (would parse as alias)
+bool_like: 'true'  # keep quotes (would parse as bool)
+double: hello  # double-quoted, safe to unquote
+null_like: 'null'  # keep quotes (would parse as null)
+number_like: '42'  # keep quotes (would parse as int)
+plain: hello  # plain scalar
+single: hello  # single-quoted, safe to unquote
+...

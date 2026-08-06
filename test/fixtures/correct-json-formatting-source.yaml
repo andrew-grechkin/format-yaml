@@ -1,0 +1,16 @@
+[
+  {
+    "col1": "a simple string",
+    "col2": "this has a\ttab",
+    "col3": "this has a\nnewline",
+    "col4": "this has a \\ backslash",
+    "subarray": [
+      {
+        "col1": "a simple string",
+        "col2": "this has a\ttab",
+        "col3": "this has a\nnewline",
+        "col4": "this has a \\ backslash"
+      }
+    ]
+  }
+]

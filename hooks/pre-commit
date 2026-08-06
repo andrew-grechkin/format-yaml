@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# git pre-commit hook: reformat staged YAML files in place using format-yaml
+#
+# Install with:
+#     just install-hooks
+#
+# Or wire it in manually if you don't have just:
+#     ln -sf ../../hooks/pre-commit .git/hooks/pre-commit
+#
+# Behavior: any staged .yaml / .yml file is reformatted
+
+set -Eeuo pipefail
+
+command -v format-yaml >/dev/null || {
+    echo "pre-commit hook: format-yaml not found in PATH" >&2
+    echo "  install: mise use go:github.com/andrew-grechkin/format-yaml@latest" >&2
+}
+
+staged=()
+while IFS= read -r -d '' path; do
+    case "$path" in
+        *.yaml|*.yml) staged+=("$path") ;;
+    esac
+done < <(git diff --cached --name-only --diff-filter=ACMR -z)
+
+[[ "${#staged[@]}" -eq 0 ]] && exit 0
+
+format-yaml --inplace -- "${staged[@]}"

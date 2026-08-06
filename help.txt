@@ -1,0 +1,24 @@
+Usage: format-yaml [OPTIONS] [FILE...]
+
+A CLI filter for formatting YAML documents. Highly opinionated but dependency free.
+
+Options:
+  -I                Format inplace via truncate (preserves inode, keeps hardlinks intact; not atomic)
+  -i, --inplace     Format inplace via atomic temp-file-plus-rename (new inode, breaks hardlinks)
+  -c, --check       Exit non-zero if input would be reformatted; write nothing
+  -d, --diff        Print a unified diff of the reformatting; exit non-zero on change
+  -h, --help        Display help message
+  -m, --man         Display full readme         (tip: format-yaml --man | colored-md)
+  -v, --version     Display version information (tip: format-yaml --version | jq -r .Version)
+  --                Stop options processing and treat everything after as positional arguments
+
+(-i --inplace), -I, --check and --diff are mutually exclusive.
+
+Environment:
+  FORMAT_YAML_MODE        One of: minimal, standard (default), full, pedantic
+  FORMAT_YAML_LINE_WIDTH  Display-column line width at which fold/unfold fires at full+ (default: 120 or TTY width - 2)
+
+Examples:
+  format-yaml <<< 'name: old # name of the item'
+  FORMAT_YAML_MODE=full format-yaml < source.json
+  format-yaml -i source.yaml

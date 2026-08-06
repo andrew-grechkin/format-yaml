@@ -1,0 +1,15 @@
+---
+# Deliberately out of alphabetical order at every level
+
+apple:
+  whiskey: 1
+  xray: 2
+  yankee: 3
+
+mango: fruit  # trailing simple scalar
+
+# this should be sorted when full+ mode applied
+zebra:
+  alpha: 1  # sorts first within zebra
+  beta: 2
+  gamma: 3

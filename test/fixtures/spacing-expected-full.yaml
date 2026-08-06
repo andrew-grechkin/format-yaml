@@ -1,0 +1,6 @@
+---
+# Blank-line preservation and collapse rules
+a: alpha  # touching next
+b: bravo
+c: charlie  # 1 blank above stays in standard
+d: delta  # 3 blanks above collapse to 1 in standard

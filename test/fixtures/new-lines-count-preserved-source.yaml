@@ -1,0 +1,14 @@
+e_no_new_lines: |-
+  line
+d_one_new_line_explicit: |
+  line
+c_one_new_line_implicit: |+
+  line
+b_two_new_lines: |+
+  line
+
+a_many_new_lines: |+
+  line
+
+
+something_after: value
