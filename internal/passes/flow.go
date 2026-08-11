@@ -158,7 +158,13 @@ func isPlainSafeItem(n ast.Node) bool {
 	}
 	switch v := n.(type) {
 	case *ast.StringNode:
-		return !astutil.IsExplicitQuote(v.Token.Type)
+		// Reject items still carrying explicit quotes (round-trip forces them to stay quoted) as well as plain values
+		// whose bytes contain flow indicators (`,`, `[`, `]`, `{`, `}`) - folding the surrounding block to flow would
+		// let those bytes terminate the sequence early.
+		if astutil.IsExplicitQuote(v.Token.Type) {
+			return false
+		}
+		return style.SafeToUnquoteInFlow(v.Value)
 	case *ast.IntegerNode, *ast.FloatNode, *ast.BoolNode, *ast.NullNode, *ast.InfinityNode, *ast.NanNode:
 		return true
 	}

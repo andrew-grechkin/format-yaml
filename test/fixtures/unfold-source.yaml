@@ -15,3 +15,4 @@ tags: [beach, beach-landscape, landscape, nature, ocean, ocean-beach, outdoor, s
 terms: [｢アルカション湾のピラ砂丘｣フランス, "42", （© aluxum/iStock/Getty Images Plus）]
 title: ｢アルカション湾のピラ砂丘｣フランス （© aluxum/iStock/Getty Images Plus）
 url: https://peapix.com/bing/35115
+success: ['^[234][0-9]{2}$']

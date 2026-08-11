@@ -12,6 +12,9 @@ id: 35115
 short_description: 欧州最大の砂丘. ｢アルカション湾のピラ砂丘｣フランス
 short_tags: [beach, nature, ocean]
 
+success:
+  - ^[234][0-9]{2}$
+
 tags:
   - beach
   - beach-landscape

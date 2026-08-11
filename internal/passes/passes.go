@@ -14,7 +14,6 @@ import (
 // sees single-line scalars. Blank-line placement is the emitter's per-boundary decision (see internal/render/emit.go),
 // not part of this AST-transformation pipeline.
 func Apply(root ast.Node, m config.Mode) {
-	style.UnquoteSafeStrings(root)
 	// canonicalizeBlockScalarChomp runs at every mode: it's lossless, and it protects source-authored `|+` blocks from
 	// having their trailing-newline count grown by the standard+ multiline-blank rule when the value only needs `|` or
 	// `|-`.
@@ -27,6 +26,14 @@ func Apply(root ast.Node, m config.Mode) {
 		blockScalarizeMultiline(root)
 		preferSingleQuotes(root)
 		unflowLongFlows(root)
+	}
+	// Placed after every flow-to-block conversion (unflowTopLevel, unflowLongFlows) and before the block-to-flow one
+	// (flowShortBlocks) so it sees each scalar in its final surrounding context. A value like `^[234][0-9]{2}$` is
+	// block-safe as a plain scalar but flow-unsafe (the bare brackets terminate the enclosing flow sequence); the
+	// flow-context aware check in UnquoteSafeStrings keeps its quotes when it sits inside a flow that survives the
+	// unflow passes, and flowShortBlocks below refuses to fold newly-plain values whose contents would misparse in flow.
+	style.UnquoteSafeStrings(root)
+	if m >= config.ModeFull {
 		flowShortBlocks(root)
 		sortMappingKeys(root)
 	}
