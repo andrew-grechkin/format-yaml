@@ -72,6 +72,7 @@ func runEmitPipeline(t *testing.T, src []byte, m config.Mode) []byte {
 		if doc.Body == nil {
 			continue
 		}
+		ReattributeAdjacentHeadComments(doc.Body, src)
 		passes.Apply(doc.Body, m)
 	}
 	return EmitFile(file, src, m, docLevels)
@@ -125,6 +126,7 @@ func runEmitPipelineOrNil(src []byte, m config.Mode) []byte {
 		if doc.Body == nil {
 			continue
 		}
+		ReattributeAdjacentHeadComments(doc.Body, src)
 		passes.Apply(doc.Body, m)
 	}
 	return EmitFile(file, src, m, docLevels)

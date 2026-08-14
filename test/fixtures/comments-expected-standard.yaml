@@ -1,0 +1,29 @@
+# the document header comment
+---
+key1: value  # this has inline comment
+key2: value
+# comment right between keys
+key3: value
+# comment right after a key
+
+key4: value
+
+# comment right before a key
+key5: value
+
+nested:
+  a: 1
+  # nested foot-of-a candidate
+
+  b: 2
+  # nested head-of-c
+  c: 3
+  d:
+    # deep head-of-x
+    x: 10
+    y: 20
+    # deep foot-of-y candidate
+
+    z: 30
+
+# comment at the end of the doc

@@ -8,10 +8,23 @@ import (
 	"github.com/andrew-grechkin/format-yaml/internal/config"
 )
 
-// Emits foot comment below the current entry, at the parent indent.
+// Emits foot comment below the current entry, at the parent indent. Blank line above the first comment line follows
+// the same mode-tiered policy as inter-entry blanks: minimal preserves the source count verbatim, standard collapses
+// any source blank to exactly one, full/pedantic drop it (the comment sits adjacent to the value).
 func (e *emitter) emitFootComment(mv *ast.MappingValueNode, indent int) {
-	if mv.FootComment == nil {
+	if mv.FootComment == nil || len(mv.FootComment.Comments) == 0 {
 		return
+	}
+	if first := mv.FootComment.Comments[0]; first.Token != nil && first.Token.Position != nil {
+		desired := 0
+		n := e.sourceBlanksBefore(first.Token.Position.Line)
+		switch {
+		case e.mode < config.ModeStandard:
+			desired = n
+		case e.mode < config.ModeFull && n > 0:
+			desired = 1
+		}
+		e.ensureTrailingNLs(1 + desired)
 	}
 	for _, c := range mv.FootComment.Comments {
 		e.writeIndent(indent)

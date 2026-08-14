@@ -9,7 +9,60 @@ import (
 	"strings"
 
 	"github.com/goccy/go-yaml/ast"
+
+	astutil "github.com/andrew-grechkin/update-yaml/pkg/ast"
 )
+
+// Walks the AST and re-attributes head comments whose physical layout says "foot of the previous entry" - the comment
+// sits source-adjacent to Values[i-1] with a blank line separating it from Values[i]'s key. Goccy attributes such a
+// comment to Values[i].Comment because its rule follows "the comment sits before the last blank line preceding a
+// key," but the source visually reads (and the author intended) foot-of-previous. Without this fix, minimal-mode
+// output shuffles the blank line to the wrong side of the comment. Walking recursively catches nested mappings and
+// sequences of mappings too.
+//
+// Runs before passes.Apply so downstream logic (sort, quote normalisation, emit) only ever sees comments in their
+// visually-correct slots.
+func ReattributeAdjacentHeadComments(root ast.Node, src []byte) {
+	srcLines := strings.Split(string(src), "\n")
+	astutil.Walk(root, func(n ast.Node) bool {
+		mn, ok := n.(*ast.MappingNode)
+		if !ok || mn.IsFlowStyle {
+			return true
+		}
+		for i := 1; i < len(mn.Values); i++ {
+			maybeMoveHeadToFoot(mn.Values[i-1], mn.Values[i], srcLines)
+		}
+		return true
+	})
+}
+
+// Moves next.Comment onto prev.FootComment when the source-blank layout around next.Comment says "foot of prev." The
+// diagnostic is symmetric with isFootOfPreviousDoc's inter-doc rule: blank line AFTER the comment (before next's key)
+// AND not-blank BEFORE (comment touches prev's value). Any other layout reads as goccy attributed it and the AST
+// stays untouched.
+func maybeMoveHeadToFoot(prev, next *ast.MappingValueNode, srcLines []string) {
+	if next.Comment == nil || len(next.Comment.Comments) == 0 {
+		return
+	}
+	first := next.Comment.Comments[0]
+	last := next.Comment.Comments[len(next.Comment.Comments)-1]
+	if first.Token == nil || first.Token.Position == nil || last.Token == nil || last.Token.Position == nil {
+		return
+	}
+	firstLine := first.Token.Position.Line - 1
+	lastLine := last.Token.Position.Line - 1
+	blankBefore := firstLine > 0 && firstLine-1 < len(srcLines) && strings.TrimSpace(srcLines[firstLine-1]) == ""
+	blankAfter := lastLine+1 < len(srcLines) && strings.TrimSpace(srcLines[lastLine+1]) == ""
+	if !blankAfter || blankBefore {
+		return
+	}
+	if prev.FootComment == nil {
+		prev.FootComment = next.Comment
+	} else {
+		prev.FootComment.Comments = append(prev.FootComment.Comments, next.Comment.Comments...)
+	}
+	next.Comment = nil
+}
 
 // Strips the FootComment from the last entry of each mapping doc IF the comment attributes as head-of-following-doc,
 // and returns the raw comment lines to emit between the two docs. Foot-of- previous-doc comments are LEFT ATTACHED so
@@ -29,6 +82,11 @@ func detachInterDocFootComments(file *ast.File, src []byte) [][]string {
 		}
 		last := mn.Values[len(mn.Values)-1]
 		if last.FootComment == nil {
+			continue
+		}
+		// Head-of-next attribution only makes sense when there IS a next doc; on the last doc, any dangling foot
+		// comment must stay attached or emitInterDocBlanks (which only fires for docIdx > 0) will drop it.
+		if i == len(file.Docs)-1 {
 			continue
 		}
 		if isFootOfPreviousDoc(last.FootComment, srcLines) {

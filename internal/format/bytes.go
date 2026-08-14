@@ -40,6 +40,10 @@ func Bytes(src []byte, m config.Mode) ([]byte, error) {
 		if doc.Body == nil {
 			continue
 		}
+		// Fix goccy's head/foot attribution for comments whose physical layout says "foot of previous entry" - the
+		// comment is source-adjacent to entry N with a blank line separating it from entry N+1. Runs before passes so
+		// sort and quote passes see the corrected attribution.
+		render.ReattributeAdjacentHeadComments(doc.Body, src)
 		passes.Apply(doc.Body, m)
 	}
 	return render.EmitFile(file, src, m, docLevels), nil
