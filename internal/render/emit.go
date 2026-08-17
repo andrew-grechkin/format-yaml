@@ -22,22 +22,19 @@ import (
 	"github.com/andrew-grechkin/format-yaml/internal/config"
 )
 
-// EmitFile is the pipeline's render entry. Walks file.Docs and returns the final byte slice.
-func EmitFile(file *ast.File, src []byte, m config.Mode, docLevels [][]string) []byte {
-	// Goccy attaches inter-doc comments as FootComment on the previous doc's last mapping entry, but source blank-line
-	// context often makes them read as HEAD of the following doc. detachInterDocFootComments separates the two
-	// attributions: head-of-next comments get pulled off the AST and returned in postDoc[prev] as raw lines we splice
-	// between docs; foot-of- previous comments stay attached and render via emitFootComment.
+// EmitFile is the pipeline's render entry. Walks docs and returns the final byte slice. The wrappers already carry
+// their positional comment groups (PreDocComments, HeadComments, FootComment) - the emitter never reaches back into
+// the AST for a doc-level slot.
+func EmitFile(file *ast.File, docs []Doc, src []byte, m config.Mode) []byte {
 	e := &emitter{
 		mode:                m,
 		perDocLeadingBlanks: sourceInterDocBlanks(src, file),
 		sourceInline:        collectSourceInlineSpaces(src),
-		postDoc:             detachInterDocFootComments(file, src),
 		perDocBlanks:        perDocSourceBlanks(src, file),
 		srcLines:            strings.Split(string(src), "\n"),
 	}
-	for docIdx, doc := range file.Docs {
-		e.emitDoc(doc, docIdx, docLevels)
+	for docIdx, doc := range docs {
+		e.emitDoc(doc, docIdx)
 	}
 	// Final cleanup: stripTrailingWhitespace defends against goccy .String() outputs that end with whitespace on
 	// non-block-scalar lines (some pathological inputs attach comment `#` tokens to anchor names, whose .String()
@@ -60,9 +57,6 @@ type emitter struct {
 	// doesn't need an additional blank line above it - the `...` already provides the doc boundary, and adding a blank
 	// changes re-parse attribution (comment becomes its own doc).
 	prevEmittedDocEnd bool
-	// Hoisted foot comments, keyed by the docIdx of the doc they followed. Non-empty entries are emitted between the
-	// previous doc and the next doc's `---`.
-	postDoc [][]string
 	// Per-doc source-observed blank-line counts between adjacent top-level entries. Consulted at minimal (preserve
 	// verbatim) and standard (collapse to <=1) modes; ignored at full+ where the wants-rule from AST shape is
 	// authoritative.

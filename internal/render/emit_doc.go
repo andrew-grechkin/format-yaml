@@ -11,10 +11,11 @@ import (
 )
 
 // Emits a single doc, including `---` header, doc-level comments, body, and optional `...` end marker.
-func (e *emitter) emitDoc(doc *ast.DocumentNode, docIdx int, docLevels [][]string) {
+func (e *emitter) emitDoc(doc Doc, docIdx int) {
+	node := doc.Node
 	// Comment-only doc (goccy models a top-of-file comment this way).
-	if astutil.IsPhantomCommentDoc(doc) {
-		cg := doc.Body.(*ast.CommentGroupNode)
+	if astutil.IsPhantomCommentDoc(node) {
+		cg := node.Body.(*ast.CommentGroupNode)
 		if e.buf.Len() > 0 {
 			e.ensureTrailingNLs(1)
 		}
@@ -27,7 +28,7 @@ func (e *emitter) emitDoc(doc *ast.DocumentNode, docIdx int, docLevels [][]strin
 		return
 	}
 
-	e.emitInterDocBlanks(docIdx)
+	e.emitInterDocBlanks(doc, docIdx)
 	e.prevWasComment = false
 	if docIdx < len(e.perDocBlanks) {
 		e.currentDocBoundaries = e.perDocBlanks[docIdx]
@@ -35,27 +36,29 @@ func (e *emitter) emitDoc(doc *ast.DocumentNode, docIdx int, docLevels [][]strin
 		e.currentDocBoundaries = nil
 	}
 	e.writeString("---\n")
-	if docIdx < len(docLevels) && len(docLevels[docIdx]) > 0 {
-		for _, line := range docLevels[docIdx] {
+	if len(doc.HeadComments) > 0 {
+		for _, line := range doc.HeadComments {
 			e.writeString(line)
 			e.writeByte('\n')
 		}
 		e.writeByte('\n')
 	}
 	// Snapshot the keep-chomp-in-subtree verdict BEFORE emit descends.
-	lastEntryKeepChomp := lastEntrySubtreeHasKeepChomp(doc)
+	lastEntryKeepChomp := lastEntrySubtreeHasKeepChomp(node)
 
-	e.emitBody(doc.Body, 0)
+	e.emitBody(node.Body, 0)
 	e.ensureTrailingNLs(1)
 
-	if e.needDocEnd(doc) {
+	e.emitDocLevelFootComment(doc.FootComment)
+
+	if e.needDocEnd(node) {
 		// A `...` marker sits directly under the last content line UNLESS the last-entry subtree contains a `|+`/`>+`
 		// block whose trailing newlines were cut short by a sibling. In that case we insert one blank line above `...`
 		// as a visual echo of what the value would have contributed had the block sat at the tail.
 		needBlank := lastEntryKeepChomp || e.mode < config.ModePedantic
 		// Exception: when the doc tail itself IS keep-chomp, the wrapper's trailing newlines already provide the visual
 		// separation and we've written them out. Adding another blank on top would double up.
-		if docTailKeepsChomp(doc.Body) {
+		if docTailKeepsChomp(node.Body) {
 			needBlank = false
 		}
 		if needBlank {
@@ -72,7 +75,7 @@ func (e *emitter) emitDoc(doc *ast.DocumentNode, docIdx int, docLevels [][]strin
 // consult the source-derived blank count at minimal, or a fixed policy at standard+ (one blank line between docs). A
 // previous doc whose tail is a `|+`/`>+` block has already emitted its trailing newlines - those count toward the
 // target, so ensureTrailingNLs (which never clips) does the right thing automatically.
-func (e *emitter) emitInterDocBlanks(docIdx int) {
+func (e *emitter) emitInterDocBlanks(doc Doc, docIdx int) {
 	if docIdx == 0 {
 		return
 	}
@@ -82,17 +85,17 @@ func (e *emitter) emitInterDocBlanks(docIdx int) {
 		e.ensureTrailingNLs(1)
 		return
 	}
-	// Hoisted head-of-next comments from the previous doc's foot slot: emit the comment lines above the coming `---`.
-	// If the previous doc emitted a `...` end marker, the marker itself provides the doc boundary (isBlankOrDocEnd
+	// Hoisted head-of-next comments (populated by HoistPreDocComments before emit): emit above the coming `---`. If
+	// the previous doc emitted a `...` end marker, the marker itself provides the doc boundary (isBlankOrDocEnd
 	// treats `...` as blank-equivalent for attribution), so we skip the extra blank line - adding one would make
 	// re-parse see the comment as its own doc, breaking idempotence.
-	if docIdx-1 < len(e.postDoc) && len(e.postDoc[docIdx-1]) > 0 {
+	if len(doc.PreDocComments) > 0 {
 		if e.prevEmittedDocEnd {
 			e.ensureTrailingNLs(1)
 		} else {
 			e.ensureTrailingNLs(2)
 		}
-		for _, line := range e.postDoc[docIdx-1] {
+		for _, line := range doc.PreDocComments {
 			e.writeString(line)
 			e.writeByte('\n')
 		}

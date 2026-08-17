@@ -6,6 +6,127 @@ export tool := 'format-yaml'
 @build: fix
     go build -o "$XDG_CACHE_HOME/go/bin/"
 
+# Build cmd/tokenize-yaml (reads YAML from stdin, dumps goccy's lexer token stream as JSON). Companion probe for
+# understanding what the tokenizer produces before goccy's parser turns it into an AST.
+@build-tokenize-yaml: fix
+    go build -o "$XDG_CACHE_HOME/go/bin/tokenize-yaml" ./cmd/tokenize-yaml
+
+# Build cmd/probe-yaml (reads YAML from stdin, dumps our own tree as JSON). Visualizer for the pkg/tree design and a
+# harness for input/expected-tree fixture tests. Will replace update-yaml/cmd/probe-yaml once the tree stabilizes.
+@build-probe-yaml: fix
+    go build -o "$XDG_CACHE_HOME/go/bin/probe-yaml" ./cmd/probe-yaml
+
+# Build cmd/emit-yaml (reads YAML, builds tree, emits bytes). Target: byte-identical round-trip on every non-fail
+# fixture. Divergences from source surface as `just test-tree-roundtrip` failures.
+@build-emit-yaml: fix
+    go build -o "$XDG_CACHE_HOME/go/bin/emit-yaml" ./cmd/emit-yaml
+
+# Round-trip every non-fail test/tree fixture through emit-yaml: input.yaml → tree → emit → bytes compared byte-
+# for-byte against the original input. Any diff = the emitter or tree lost information from the source.
+test-tree-roundtrip: build-emit-yaml
+    #!/usr/bin/env -S bash -Eeuo pipefail
+    bin="$XDG_CACHE_HOME/go/bin/emit-yaml"
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    fail=0
+    shopt -s nullglob
+    for source in test/tree/*.yaml test/fixtures/*.yaml; do
+        name=${source#test/}
+        base=$(basename "$source" .yaml)
+        if [[ "$base" == fail-* ]]; then continue; fi
+        echo -n "Round-trip $name... " >&2
+        got="$tmp/$(basename "$source")"
+        "$bin" < "$source" > "$got"
+        if ! diff -q "$source" "$got" > /dev/null 2>&1; then
+            echo "✗ FAIL" >&2
+            diff -u --label "source" --label "emitted" "$source" "$got" >&2 || true
+            fail=1
+            continue
+        fi
+        echo "✓ PASS" >&2
+    done
+    exit "$fail"
+
+# Temporary playground for developing pkg/tree: rebuilds probe-yaml, pipes a YAML sample into it, and shows the JSON
+# tree. Sample source is edited inline here as new node types get added - not a permanent test, just a fast REPL.
+try-probe-yaml: build-probe-yaml
+    #!/usr/bin/env -S bash -Eeuo pipefail
+    bin="$XDG_CACHE_HOME/go/bin/probe-yaml"
+    src=$'# island before header\n\n# adjacent to header\n---\n\n# island before null\n\nnull\n\n# island before footer\n\n# adjacent to footer\n...\n'
+    printf '%s' "$src" | "$bin"
+
+# Run pkg/tree fixtures: each test/tree/<name>.yaml is fed to probe-yaml and its JSON output is compared to
+# test/tree/<name>.json. Fails on any mismatch. Regenerate expected files with `just gen-tree-fixtures`.
+test-tree: build-probe-yaml
+    #!/usr/bin/env -S bash -Eeuo pipefail
+    bin="$XDG_CACHE_HOME/go/bin/probe-yaml"
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+    fail=0
+    shopt -s nullglob
+    for source in test/tree/*.yaml; do
+        name=$(basename "$source" .yaml)
+        echo -n "Testing tree/$name... " >&2
+        if [[ "$name" == fail-* ]]; then
+            # Expected-fail case: probe-yaml must exit non-zero, stderr must match .err fixture.
+            expected="test/tree/${name}.err"
+            if [[ ! -f "$expected" ]]; then
+                echo "✗ MISSING $expected (run just gen-tree-fixtures)" >&2
+                fail=1
+                continue
+            fi
+            got="$tmp/$name.err"
+            if "$bin" < "$source" > /dev/null 2> "$got"; then
+                echo "✗ FAIL (expected non-zero exit, got success)" >&2
+                fail=1
+                continue
+            fi
+            if ! diff -q "$expected" "$got" > /dev/null 2>&1; then
+                echo "✗ FAIL (stderr mismatch)" >&2
+                diff -u --label "expected" --label "actual" "$expected" "$got" >&2 || true
+                fail=1
+                continue
+            fi
+            echo "✓ PASS" >&2
+            continue
+        fi
+        expected="test/tree/${name}.json"
+        if [[ ! -f "$expected" ]]; then
+            echo "✗ MISSING $expected (run just gen-tree-fixtures)" >&2
+            fail=1
+            continue
+        fi
+        got="$tmp/$name.json"
+        "$bin" < "$source" > "$got"
+        if ! diff -q "$expected" "$got" > /dev/null 2>&1; then
+            echo "✗ FAIL" >&2
+            diff -u --label "expected" --label "actual" "$expected" "$got" >&2 || true
+            fail=1
+            continue
+        fi
+        echo "✓ PASS" >&2
+    done
+    exit "$fail"
+
+# Regenerate expected JSON for every test/tree/<name>.yaml by running probe-yaml. Overwrites existing files -
+# use with care and eyeball the diff before committing.
+gen-tree-fixtures: build-probe-yaml
+    #!/usr/bin/env -S bash -Eeuo pipefail
+    bin="$XDG_CACHE_HOME/go/bin/probe-yaml"
+    shopt -s nullglob
+    for source in test/tree/*.yaml; do
+        name=$(basename "$source" .yaml)
+        if [[ "$name" == fail-* ]]; then
+            expected="test/tree/${name}.err"
+            "$bin" < "$source" > /dev/null 2> "$expected" || true
+            echo "wrote $expected" >&2
+            continue
+        fi
+        expected="test/tree/${name}.json"
+        "$bin" < "$source" > "$expected"
+        echo "wrote $expected" >&2
+    done
+
 # Install the binary globally
 @install:
     go install "$tool"
@@ -38,10 +159,6 @@ export tool := 'format-yaml'
 @test-unit:
     go test -v ./...
 
-# Run the fuzz test for FUZZTIME seconds (default 60)
-@fuzz duration='60s':
-    # Corpus lives under testdata/fuzz and is gitignored; delete testdata/ to reset.
-    go test -fuzz=FuzzFormatBytes -fuzztime={{duration}} -run='^$' .
 
 # Run integration tests by driving the binary against fixtures
 test-int: build

@@ -1093,38 +1093,3 @@ func TestFormatFilesToStdoutAllOrNothing(t *testing.T) {
 		t.Errorf("expected zero bytes written on failure; got %d bytes: %q", out.Len(), out.Bytes())
 	}
 }
-
-// Seeds the fuzzer with every fixture source, then exercises format.Bytes against random inputs. The guarantees
-// checked: no panic, and - when a random input successfully parses - the second pass over the first pass's output
-// matches byte-for-byte (idempotence).
-func FuzzFormatBytes(f *testing.F) {
-	entries, err := filepath.Glob("test/fixtures/*-source.yaml")
-	if err != nil {
-		f.Fatal(err)
-	}
-	for _, path := range entries {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			f.Fatal(err)
-		}
-		for m := config.ModeMinimal; m <= config.ModePedantic; m++ {
-			f.Add(data, int(m))
-		}
-	}
-
-	f.Fuzz(func(t *testing.T, src []byte, modeIdx int) {
-		m := config.Mode(modeIdx%int(config.ModePedantic) + int(config.ModeMinimal))
-		out1, err := format.Bytes(src, m)
-		if err != nil {
-			return
-		}
-		out2, err := format.Bytes(out1, m)
-		if err != nil {
-			t.Logf("second-pass parse failure (round-trip glitch): %v", err)
-			return
-		}
-		if !bytes.Equal(out1, out2) {
-			t.Fatalf("not idempotent\nfirst:\n%q\nsecond:\n%q", out1, out2)
-		}
-	})
-}

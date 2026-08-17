@@ -18,14 +18,31 @@ func (e *emitter) emitSequence(seq *ast.SequenceNode, indent int) {
 		e.writeString(seq.String())
 		return
 	}
+	// Sequence's own head comment: goccy stores a leading comment that sits above the first item on the SequenceNode
+	// itself (BaseNode.Comment), not on ValueHeadComments[0]. Emit inline before the first item so an adjacent-in-
+	// source layout stays adjacent - and so doc-level heads don't need to be extracted from sequence bodies (unlike
+	// mapping bodies where extraction protects against sort dragging the comment along with the first entry).
+	if seq.BaseNode != nil && seq.BaseNode.Comment != nil {
+		e.emitCommentGroup(seq.BaseNode.Comment, indent)
+	}
 	for i, item := range seq.Values {
 		if i > 0 {
 			e.emitInterItemBlank(item)
+		}
+		if i < len(seq.ValueHeadComments) {
+			e.emitSequenceItemHeadComment(seq.ValueHeadComments[i], indent)
 		}
 		e.writeIndent(indent)
 		e.writeString("- ")
 		e.emitSequenceItemBody(item, indent+2)
 	}
+}
+
+// Emits the head-comment block (if any) that sits above sequence item i. Goccy stores these on SequenceNode.
+// ValueHeadComments[i]; nothing else does. Shares the CommentGroupNode emission with foot comments so the mode-tiered
+// leading-blank rule stays uniform (minimal preserves source count, standard collapses to 1, full/pedantic drop).
+func (e *emitter) emitSequenceItemHeadComment(cg *ast.CommentGroupNode, indent int) {
+	e.emitCommentGroup(cg, indent)
 }
 
 // Emits the spacing before a sequence item after item[0]. Minimal preserves the source's blank-line count verbatim;

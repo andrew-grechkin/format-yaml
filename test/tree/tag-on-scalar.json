@@ -1,0 +1,256 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "MappingNode": {
+                "Children": [
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "version",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 1,
+                              "Offset": 1
+                            },
+                            "Type": 31,
+                            "Value": "version"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "TagNode": {
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Tag": {
+                            "Token": {
+                              "CharacterType": 0,
+                              "Error": "",
+                              "Indicator": 4,
+                              "Origin": " !!str ",
+                              "Position": {
+                                "Column": 10,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 10
+                              },
+                              "Type": 15,
+                              "Value": "!!str"
+                            }
+                          },
+                          "Value": {
+                            "ScalarNode": {
+                              "Header": null,
+                              "InlineComment": null,
+                              "PrecedingComment": null,
+                              "Style": 0,
+                              "Token": {
+                                "CharacterType": 2,
+                                "Error": "",
+                                "Indicator": 0,
+                                "Origin": "42\n",
+                                "Position": {
+                                  "Column": 15,
+                                  "IndentLevel": 0,
+                                  "IndentNum": 0,
+                                  "Line": 1,
+                                  "Offset": 15
+                                },
+                                "Type": 26,
+                                "Value": "42"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "timestamp",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 2,
+                              "Offset": 18
+                            },
+                            "Type": 31,
+                            "Value": "timestamp"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "TagNode": {
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Tag": {
+                            "Token": {
+                              "CharacterType": 0,
+                              "Error": "",
+                              "Indicator": 4,
+                              "Origin": " !!timestamp ",
+                              "Position": {
+                                "Column": 12,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 2,
+                                "Offset": 29
+                              },
+                              "Type": 15,
+                              "Value": "!!timestamp"
+                            }
+                          },
+                          "Value": {
+                            "ScalarNode": {
+                              "Header": null,
+                              "InlineComment": null,
+                              "PrecedingComment": null,
+                              "Style": 0,
+                              "Token": {
+                                "CharacterType": 2,
+                                "Error": "",
+                                "Indicator": 0,
+                                "Origin": "2024-01-01\n",
+                                "Position": {
+                                  "Column": 23,
+                                  "IndentLevel": 0,
+                                  "IndentNum": 0,
+                                  "Line": 2,
+                                  "Offset": 40
+                                },
+                                "Type": 31,
+                                "Value": "2024-01-01"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "custom",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 3,
+                              "Offset": 51
+                            },
+                            "Type": 31,
+                            "Value": "custom"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "TagNode": {
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Tag": {
+                            "Token": {
+                              "CharacterType": 0,
+                              "Error": "",
+                              "Indicator": 4,
+                              "Origin": " !mytag ",
+                              "Position": {
+                                "Column": 9,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 3,
+                                "Offset": 59
+                              },
+                              "Type": 15,
+                              "Value": "!mytag"
+                            }
+                          },
+                          "Value": {
+                            "ScalarNode": {
+                              "Header": null,
+                              "InlineComment": null,
+                              "PrecedingComment": null,
+                              "Style": 0,
+                              "Token": {
+                                "CharacterType": 2,
+                                "Error": "",
+                                "Indicator": 0,
+                                "Origin": "value",
+                                "Position": {
+                                  "Column": 15,
+                                  "IndentLevel": 0,
+                                  "IndentNum": 0,
+                                  "Line": 3,
+                                  "Offset": 65
+                                },
+                                "Type": 31,
+                                "Value": "value"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ],
+                "Close": null,
+                "InlineComment": null,
+                "Open": null,
+                "PrecedingComment": null,
+                "Style": 0
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": null
+        }
+      }
+    ]
+  }
+}

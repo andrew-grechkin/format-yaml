@@ -1,0 +1,76 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "NullNode": {
+                "InlineComment": null,
+                "PrecedingComment": null,
+                "Token": null
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": {
+            "DocHeader": {
+              "InlineComment": null,
+              "PrecedingComment": null,
+              "Token": {
+                "CharacterType": 2,
+                "Error": "",
+                "Indicator": 0,
+                "Origin": "---",
+                "Position": {
+                  "Column": 1,
+                  "IndentLevel": 0,
+                  "IndentNum": 0,
+                  "Line": 1,
+                  "Offset": 1
+                },
+                "Type": 1,
+                "Value": "---"
+              }
+            }
+          }
+        }
+      },
+      {
+        "Doc": {
+          "Children": [
+            {
+              "NullNode": {
+                "InlineComment": null,
+                "PrecedingComment": null,
+                "Token": null
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": {
+            "DocHeader": {
+              "InlineComment": null,
+              "PrecedingComment": null,
+              "Token": {
+                "CharacterType": 2,
+                "Error": "",
+                "Indicator": 0,
+                "Origin": "\n---",
+                "Position": {
+                  "Column": 1,
+                  "IndentLevel": 0,
+                  "IndentNum": 0,
+                  "Line": 2,
+                  "Offset": 5
+                },
+                "Type": 1,
+                "Value": "---"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

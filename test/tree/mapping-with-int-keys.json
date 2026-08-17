@@ -1,0 +1,133 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "MappingNode": {
+                "Children": [
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "42",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 1,
+                              "Offset": 1
+                            },
+                            "Type": 26,
+                            "Value": "42"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": " forty-two\n",
+                            "Position": {
+                              "Column": 5,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 1,
+                              "Offset": 5
+                            },
+                            "Type": 31,
+                            "Value": "forty-two"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "100",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 2,
+                              "Offset": 15
+                            },
+                            "Type": 26,
+                            "Value": "100"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": " hundred",
+                            "Position": {
+                              "Column": 6,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 2,
+                              "Offset": 20
+                            },
+                            "Type": 31,
+                            "Value": "hundred"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ],
+                "Close": null,
+                "InlineComment": null,
+                "Open": null,
+                "PrecedingComment": null,
+                "Style": 0
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": null
+        }
+      }
+    ]
+  }
+}

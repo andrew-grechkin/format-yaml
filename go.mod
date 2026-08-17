@@ -4,7 +4,7 @@ go 1.25.1
 
 require github.com/andrew-grechkin/update-yaml v1.5.2
 
-// replace github.com/andrew-grechkin/update-yaml => ../update-yaml
+replace github.com/andrew-grechkin/update-yaml => ../update-yaml
 
 require github.com/goccy/go-yaml v1.19.2
 

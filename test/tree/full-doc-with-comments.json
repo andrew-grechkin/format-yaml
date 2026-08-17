@@ -1,0 +1,200 @@
+{
+  "File": {
+    "Children": [
+      {
+        "EmptyNode": {
+          "PrecedingComment": {
+            "CommentNode": {
+              "Lines": [
+                {
+                  "Token": {
+                    "CharacterType": 0,
+                    "Error": "",
+                    "Indicator": 3,
+                    "Origin": "# island before header\n",
+                    "Position": {
+                      "Column": 1,
+                      "IndentLevel": 0,
+                      "IndentNum": 0,
+                      "Line": 1,
+                      "Offset": 1
+                    },
+                    "Type": 12,
+                    "Value": " island before header"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "Doc": {
+          "Children": [
+            {
+              "EmptyNode": {
+                "PrecedingComment": {
+                  "CommentNode": {
+                    "Lines": [
+                      {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 3,
+                          "Origin": "\n\n# island before null\n",
+                          "Position": {
+                            "Column": 1,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 6,
+                            "Offset": 49
+                          },
+                          "Type": 12,
+                          "Value": " island before null"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "NullNode": {
+                "InlineComment": null,
+                "PrecedingComment": null,
+                "Token": {
+                  "CharacterType": 2,
+                  "Error": "",
+                  "Indicator": 0,
+                  "Origin": "\nnull\n\n",
+                  "Position": {
+                    "Column": 1,
+                    "IndentLevel": 0,
+                    "IndentNum": 0,
+                    "Line": 8,
+                    "Offset": 70
+                  },
+                  "Type": 22,
+                  "Value": "null"
+                }
+              }
+            },
+            {
+              "EmptyNode": {
+                "PrecedingComment": {
+                  "CommentNode": {
+                    "Lines": [
+                      {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 3,
+                          "Origin": "# island before footer\n",
+                          "Position": {
+                            "Column": 1,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 10,
+                            "Offset": 76
+                          },
+                          "Type": 12,
+                          "Value": " island before footer"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ],
+          "Footer": {
+            "DocFooter": {
+              "InlineComment": null,
+              "PrecedingComment": {
+                "CommentNode": {
+                  "Lines": [
+                    {
+                      "Token": {
+                        "CharacterType": 0,
+                        "Error": "",
+                        "Indicator": 3,
+                        "Origin": "\n# adjacent to footer\n",
+                        "Position": {
+                          "Column": 1,
+                          "IndentLevel": 0,
+                          "IndentNum": 0,
+                          "Line": 12,
+                          "Offset": 99
+                        },
+                        "Type": 12,
+                        "Value": " adjacent to footer"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Token": {
+                "CharacterType": 2,
+                "Error": "",
+                "Indicator": 0,
+                "Origin": "...",
+                "Position": {
+                  "Column": 1,
+                  "IndentLevel": 0,
+                  "IndentNum": 0,
+                  "Line": 13,
+                  "Offset": 119
+                },
+                "Type": 2,
+                "Value": "..."
+              }
+            }
+          },
+          "Header": {
+            "DocHeader": {
+              "InlineComment": null,
+              "PrecedingComment": {
+                "CommentNode": {
+                  "Lines": [
+                    {
+                      "Token": {
+                        "CharacterType": 0,
+                        "Error": "",
+                        "Indicator": 3,
+                        "Origin": "\n# adjacent to header\n",
+                        "Position": {
+                          "Column": 1,
+                          "IndentLevel": 0,
+                          "IndentNum": 0,
+                          "Line": 3,
+                          "Offset": 24
+                        },
+                        "Type": 12,
+                        "Value": " adjacent to header"
+                      }
+                    }
+                  ]
+                }
+              },
+              "Token": {
+                "CharacterType": 2,
+                "Error": "",
+                "Indicator": 0,
+                "Origin": "---",
+                "Position": {
+                  "Column": 1,
+                  "IndentLevel": 0,
+                  "IndentNum": 0,
+                  "Line": 4,
+                  "Offset": 44
+                },
+                "Type": 1,
+                "Value": "---"
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

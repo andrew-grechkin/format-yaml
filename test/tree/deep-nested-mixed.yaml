@@ -1,0 +1,10 @@
+outer:
+  list:
+    - name: first
+      tags:
+        - red
+        - green
+    - name: second
+      tags:
+        - blue
+  scalar: hello

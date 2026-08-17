@@ -1,0 +1,37 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "ScalarNode": {
+                "Header": null,
+                "InlineComment": null,
+                "PrecedingComment": null,
+                "Style": 0,
+                "Token": {
+                  "CharacterType": 2,
+                  "Error": "",
+                  "Indicator": 0,
+                  "Origin": "3.14",
+                  "Position": {
+                    "Column": 1,
+                    "IndentLevel": 0,
+                    "IndentNum": 0,
+                    "Line": 1,
+                    "Offset": 1
+                  },
+                  "Type": 30,
+                  "Value": "3.14"
+                }
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": null
+        }
+      }
+    ]
+  }
+}

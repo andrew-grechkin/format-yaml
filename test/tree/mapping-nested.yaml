@@ -1,0 +1,6 @@
+outer:
+  inner:
+    leaf: value
+    other: 42
+  sibling: text
+top: level

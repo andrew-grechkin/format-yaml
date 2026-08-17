@@ -1,0 +1,9 @@
+defaults: &base
+  timeout: 30
+  retries: 3
+
+server:
+  <<: *base
+  host: example.com
+
+fallback: *base

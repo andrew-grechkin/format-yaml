@@ -1,0 +1,453 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "MappingNode": {
+                "Children": [
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "defaults",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 0,
+                              "IndentNum": 0,
+                              "Line": 1,
+                              "Offset": 1
+                            },
+                            "Type": 31,
+                            "Value": "defaults"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "AnchorNode": {
+                          "Amp": {
+                            "Token": {
+                              "CharacterType": 0,
+                              "Error": "",
+                              "Indicator": 4,
+                              "Origin": " \u0026",
+                              "Position": {
+                                "Column": 11,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 11
+                              },
+                              "Type": 13,
+                              "Value": "\u0026"
+                            }
+                          },
+                          "InlineComment": null,
+                          "Name": {
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "base",
+                              "Position": {
+                                "Column": 12,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 12
+                              },
+                              "Type": 31,
+                              "Value": "base"
+                            }
+                          },
+                          "PrecedingComment": null,
+                          "Value": {
+                            "MappingNode": {
+                              "Children": [
+                                {
+                                  "MappingEntry": {
+                                    "Comma": null,
+                                    "ExplicitKeyMarker": null,
+                                    "InlineComment": null,
+                                    "Key": {
+                                      "ScalarNode": {
+                                        "Header": null,
+                                        "InlineComment": null,
+                                        "PrecedingComment": null,
+                                        "Style": 0,
+                                        "Token": {
+                                          "CharacterType": 2,
+                                          "Error": "",
+                                          "Indicator": 0,
+                                          "Origin": "\n  timeout",
+                                          "Position": {
+                                            "Column": 3,
+                                            "IndentLevel": 1,
+                                            "IndentNum": 2,
+                                            "Line": 2,
+                                            "Offset": 19
+                                          },
+                                          "Type": 31,
+                                          "Value": "timeout"
+                                        }
+                                      }
+                                    },
+                                    "PrecedingComment": null,
+                                    "Value": {
+                                      "ScalarNode": {
+                                        "Header": null,
+                                        "InlineComment": null,
+                                        "PrecedingComment": null,
+                                        "Style": 0,
+                                        "Token": {
+                                          "CharacterType": 2,
+                                          "Error": "",
+                                          "Indicator": 0,
+                                          "Origin": " 30\n  ",
+                                          "Position": {
+                                            "Column": 12,
+                                            "IndentLevel": 1,
+                                            "IndentNum": 2,
+                                            "Line": 2,
+                                            "Offset": 28
+                                          },
+                                          "Type": 26,
+                                          "Value": "30"
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "MappingEntry": {
+                                    "Comma": null,
+                                    "ExplicitKeyMarker": null,
+                                    "InlineComment": null,
+                                    "Key": {
+                                      "ScalarNode": {
+                                        "Header": null,
+                                        "InlineComment": null,
+                                        "PrecedingComment": null,
+                                        "Style": 0,
+                                        "Token": {
+                                          "CharacterType": 2,
+                                          "Error": "",
+                                          "Indicator": 0,
+                                          "Origin": "retries",
+                                          "Position": {
+                                            "Column": 3,
+                                            "IndentLevel": 1,
+                                            "IndentNum": 2,
+                                            "Line": 3,
+                                            "Offset": 33
+                                          },
+                                          "Type": 31,
+                                          "Value": "retries"
+                                        }
+                                      }
+                                    },
+                                    "PrecedingComment": null,
+                                    "Value": {
+                                      "ScalarNode": {
+                                        "Header": null,
+                                        "InlineComment": null,
+                                        "PrecedingComment": null,
+                                        "Style": 0,
+                                        "Token": {
+                                          "CharacterType": 2,
+                                          "Error": "",
+                                          "Indicator": 0,
+                                          "Origin": " 3\n\n",
+                                          "Position": {
+                                            "Column": 12,
+                                            "IndentLevel": 1,
+                                            "IndentNum": 2,
+                                            "Line": 3,
+                                            "Offset": 42
+                                          },
+                                          "Type": 26,
+                                          "Value": "3"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              ],
+                              "Close": null,
+                              "InlineComment": null,
+                              "Open": null,
+                              "PrecedingComment": null,
+                              "Style": 0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "server",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 1,
+                              "IndentNum": 0,
+                              "Line": 5,
+                              "Offset": 45
+                            },
+                            "Type": 31,
+                            "Value": "server"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "MappingNode": {
+                          "Children": [
+                            {
+                              "MappingEntry": {
+                                "Comma": null,
+                                "ExplicitKeyMarker": null,
+                                "InlineComment": null,
+                                "Key": {
+                                  "ScalarNode": {
+                                    "Header": null,
+                                    "InlineComment": null,
+                                    "PrecedingComment": null,
+                                    "Style": 0,
+                                    "Token": {
+                                      "CharacterType": 2,
+                                      "Error": "",
+                                      "Indicator": 0,
+                                      "Origin": "\n  \u003c\u003c",
+                                      "Position": {
+                                        "Column": 3,
+                                        "IndentLevel": 2,
+                                        "IndentNum": 2,
+                                        "Line": 6,
+                                        "Offset": 55
+                                      },
+                                      "Type": 6,
+                                      "Value": "\u003c\u003c"
+                                    }
+                                  }
+                                },
+                                "PrecedingComment": null,
+                                "Value": {
+                                  "AliasNode": {
+                                    "InlineComment": null,
+                                    "Name": {
+                                      "Token": {
+                                        "CharacterType": 2,
+                                        "Error": "",
+                                        "Indicator": 0,
+                                        "Origin": "base",
+                                        "Position": {
+                                          "Column": 8,
+                                          "IndentLevel": 2,
+                                          "IndentNum": 2,
+                                          "Line": 6,
+                                          "Offset": 60
+                                        },
+                                        "Type": 31,
+                                        "Value": "base"
+                                      }
+                                    },
+                                    "PrecedingComment": null,
+                                    "Star": {
+                                      "Token": {
+                                        "CharacterType": 0,
+                                        "Error": "",
+                                        "Indicator": 4,
+                                        "Origin": " *",
+                                        "Position": {
+                                          "Column": 7,
+                                          "IndentLevel": 2,
+                                          "IndentNum": 2,
+                                          "Line": 6,
+                                          "Offset": 59
+                                        },
+                                        "Type": 14,
+                                        "Value": "*"
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "MappingEntry": {
+                                "Comma": null,
+                                "ExplicitKeyMarker": null,
+                                "InlineComment": null,
+                                "Key": {
+                                  "ScalarNode": {
+                                    "Header": null,
+                                    "InlineComment": null,
+                                    "PrecedingComment": null,
+                                    "Style": 0,
+                                    "Token": {
+                                      "CharacterType": 2,
+                                      "Error": "",
+                                      "Indicator": 0,
+                                      "Origin": "\n  host",
+                                      "Position": {
+                                        "Column": 3,
+                                        "IndentLevel": 2,
+                                        "IndentNum": 2,
+                                        "Line": 7,
+                                        "Offset": 67
+                                      },
+                                      "Type": 31,
+                                      "Value": "host"
+                                    }
+                                  }
+                                },
+                                "PrecedingComment": null,
+                                "Value": {
+                                  "ScalarNode": {
+                                    "Header": null,
+                                    "InlineComment": null,
+                                    "PrecedingComment": null,
+                                    "Style": 0,
+                                    "Token": {
+                                      "CharacterType": 2,
+                                      "Error": "",
+                                      "Indicator": 0,
+                                      "Origin": " example.com\n\n",
+                                      "Position": {
+                                        "Column": 9,
+                                        "IndentLevel": 2,
+                                        "IndentNum": 2,
+                                        "Line": 7,
+                                        "Offset": 73
+                                      },
+                                      "Type": 31,
+                                      "Value": "example.com"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "Close": null,
+                          "InlineComment": null,
+                          "Open": null,
+                          "PrecedingComment": null,
+                          "Style": 0
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Comma": null,
+                      "ExplicitKeyMarker": null,
+                      "InlineComment": null,
+                      "Key": {
+                        "ScalarNode": {
+                          "Header": null,
+                          "InlineComment": null,
+                          "PrecedingComment": null,
+                          "Style": 0,
+                          "Token": {
+                            "CharacterType": 2,
+                            "Error": "",
+                            "Indicator": 0,
+                            "Origin": "fallback",
+                            "Position": {
+                              "Column": 1,
+                              "IndentLevel": 2,
+                              "IndentNum": 0,
+                              "Line": 9,
+                              "Offset": 86
+                            },
+                            "Type": 31,
+                            "Value": "fallback"
+                          }
+                        }
+                      },
+                      "PrecedingComment": null,
+                      "Value": {
+                        "AliasNode": {
+                          "InlineComment": null,
+                          "Name": {
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "base",
+                              "Position": {
+                                "Column": 12,
+                                "IndentLevel": 2,
+                                "IndentNum": 0,
+                                "Line": 9,
+                                "Offset": 97
+                              },
+                              "Type": 31,
+                              "Value": "base"
+                            }
+                          },
+                          "PrecedingComment": null,
+                          "Star": {
+                            "Token": {
+                              "CharacterType": 0,
+                              "Error": "",
+                              "Indicator": 4,
+                              "Origin": " *",
+                              "Position": {
+                                "Column": 11,
+                                "IndentLevel": 2,
+                                "IndentNum": 0,
+                                "Line": 9,
+                                "Offset": 96
+                              },
+                              "Type": 14,
+                              "Value": "*"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                ],
+                "Close": null,
+                "InlineComment": null,
+                "Open": null,
+                "PrecedingComment": null,
+                "Style": 0
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": null
+        }
+      }
+    ]
+  }
+}

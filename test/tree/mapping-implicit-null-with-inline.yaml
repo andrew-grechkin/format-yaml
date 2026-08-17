@@ -1,0 +1,3 @@
+a: null  # explicit
+b:  # implicit null value, inline comment
+c: 42

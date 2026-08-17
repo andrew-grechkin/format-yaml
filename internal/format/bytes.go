@@ -29,13 +29,20 @@ func Bytes(src []byte, m config.Mode) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("parse yaml: %w", err)
 	}
-	// Extract doc-level head comments before passes run so the sort pass in full+ mode doesn't drag them along with the
-	// first entry. render.ExtractDocLevelHeadComments handles a nil body via its own type-assertion guard, so no
-	// per-doc nil check needed here.
-	docLevels := make([][]string, len(file.Docs))
+	// Doc-level comment extraction runs before passes.Apply so the sort pass in full+ mode doesn't drag the extracted
+	// tokens along with the first/last entry. Every foot slot gets drained into Doc.FootComment first; then
+	// HoistPreDocComments walks the slice and promotes any group whose source layout reads as head-of-next-doc onto
+	// docs[i+1].PreDocComments. Loop bound (< len-1) inside Hoist is the reason the last doc's trailing comment
+	// never gets orphaned - no explicit last-doc guard needed.
+	docs := make([]render.Doc, len(file.Docs))
 	for i, doc := range file.Docs {
-		docLevels[i] = render.ExtractDocLevelHeadComments(doc)
+		docs[i] = render.Doc{
+			Node:         doc,
+			HeadComments: render.ExtractDocLevelHead(doc),
+			FootComment:  render.ExtractDocLevelFoot(doc),
+		}
 	}
+	render.HoistPreDocComments(docs, src)
 	for _, doc := range file.Docs {
 		if doc.Body == nil {
 			continue
@@ -46,5 +53,5 @@ func Bytes(src []byte, m config.Mode) ([]byte, error) {
 		render.ReattributeAdjacentHeadComments(doc.Body, src)
 		passes.Apply(doc.Body, m)
 	}
-	return render.EmitFile(file, src, m, docLevels), nil
+	return render.EmitFile(file, docs, src, m), nil
 }
