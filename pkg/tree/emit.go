@@ -149,7 +149,9 @@ func (e *MappingEntry) ToString() string {
 	if e.Key != nil {
 		sb.WriteString(e.Key.ToString())
 	}
-	sb.WriteString(":")
+	if e.Colon != nil {
+		sb.WriteString(e.Colon.Origin)
+	}
 	if e.Value != nil {
 		sb.WriteString(e.Value.ToString())
 	}

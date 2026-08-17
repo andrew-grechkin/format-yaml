@@ -9,12 +9,29 @@
                 "Children": [
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 6,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 6
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": {
                         "Token": {
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ",",
+                          "Origin": ", ",
                           "Position": {
                             "Column": 13,
                             "IndentLevel": 0,
@@ -62,7 +79,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " alice",
+                            "Origin": "alice",
                             "Position": {
                               "Column": 8,
                               "IndentLevel": 0,
@@ -79,12 +96,29 @@
                   },
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 18,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 18
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": {
                         "Token": {
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ",",
+                          "Origin": ", ",
                           "Position": {
                             "Column": 22,
                             "IndentLevel": 0,
@@ -108,7 +142,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " age",
+                            "Origin": "age",
                             "Position": {
                               "Column": 15,
                               "IndentLevel": 0,
@@ -132,7 +166,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " 30",
+                            "Origin": "30",
                             "Position": {
                               "Column": 20,
                               "IndentLevel": 0,
@@ -149,6 +183,23 @@
                   },
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 30,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 30
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -162,7 +213,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " active",
+                            "Origin": "active",
                             "Position": {
                               "Column": 24,
                               "IndentLevel": 0,
@@ -186,7 +237,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " true",
+                            "Origin": "true",
                             "Position": {
                               "Column": 32,
                               "IndentLevel": 0,

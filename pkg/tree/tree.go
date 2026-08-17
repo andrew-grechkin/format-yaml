@@ -11,10 +11,9 @@ package tree
 
 import (
 	"fmt"
-	"strings"
 
-	"github.com/goccy/go-yaml/lexer"
-	"github.com/goccy/go-yaml/token"
+	"github.com/andrew-grechkin/format-yaml/internal/lexer"
+	"github.com/andrew-grechkin/format-yaml/internal/token"
 )
 
 // Node is the common interface every tree node satisfies. Data returns the semantic content of this node - for a
@@ -25,46 +24,14 @@ type Node interface {
 	ToString() string
 }
 
-// Build parses src via goccy's lexer and constructs our tree. Panics if the token stream carries any token type we
-// don't yet handle - deliberate, so unsupported inputs surface immediately during development instead of getting a
-// silently-dropped subtree.
+// Build parses src via our internal lexer (goccy fork), then constructs our tree. Panics if the token stream
+// carries any token type we don't yet handle - deliberate, so unsupported inputs surface immediately during
+// development instead of getting a silently-dropped subtree. Tokens arrive with our "trailing-only" Origin
+// invariant already applied (see lexer.TokenizeNormalized), so downstream emit is just Origin concatenation.
 func Build(src []byte) *File {
-	tokens := lexer.Tokenize(string(src))
-	alignOrigins(tokens, src)
+	tokens := lexer.TokenizeNormalized(string(src))
 	b := &builder{tokens: tokens}
 	return b.buildFile()
-}
-
-// alignOrigins normalizes each token's Origin so that concatenating all Origins in order equals the source (up
-// to any goccy-dropped trailing bytes and orphan whitespace goccy discards between tokens). Goccy's lexer
-// sometimes double-encodes source bytes in adjacent tokens (a tag `!\n` and the following scalar `\n0000` both
-// claim the same `\n`); it also sometimes drops leading whitespace that isn't part of any token. We walk left-
-// to-right with a running position: for each token we find where its Origin appears in source at or after pos,
-// stripping the Origin's leading chars if needed. Orphan bytes between tokens (unmatched by any Origin) get
-// absorbed silently - the tree emits only what tokens carry.
-func alignOrigins(tokens token.Tokens, src []byte) {
-	srcStr := string(src)
-	pos := 0
-	for i, t := range tokens {
-		origin := t.Origin
-		bestPos := -1
-		for len(origin) > 0 {
-			// Search from pos forward for origin's first match.
-			idx := strings.Index(srcStr[pos:], origin)
-			if idx >= 0 {
-				bestPos = pos + idx
-				break
-			}
-			// Not found - strip a leading char and retry (goccy may have overlapped this Origin with prior).
-			origin = origin[1:]
-		}
-		if bestPos < 0 {
-			tokens[i].Origin = ""
-			continue
-		}
-		tokens[i].Origin = origin
-		pos = bestPos + len(origin)
-	}
 }
 
 // File is a YAML stream: an ordered list of children. Children can be Docs or EmptyNodes (island comments that sit
@@ -221,12 +188,14 @@ func (m *MappingNode) Data() any {
 }
 
 // MappingEntry is a single key/value pair inside a MappingNode. ExplicitKeyMarker is populated when the entry
-// used the `? key\n: value` form; nil for the common `key: value` shape. Comma carries the `,` token that
-// followed this entry inside a flow mapping (nil for block or the last flow entry). Preserving these lets the
-// emitter round-trip the source exactly, including the whitespace those tokens absorbed.
+// used the `? key\n: value` form; nil for the common `key: value` shape. Colon carries the `:` token itself so
+// its Origin (which under our trailing-only tokenizer contract holds the whitespace/newline separating key from
+// value) round-trips verbatim - synthesizing `":"` in emit would drop that separator. Comma carries the `,` token
+// that followed this entry inside a flow mapping (nil for block or the last flow entry).
 type MappingEntry struct {
 	ExplicitKeyMarker *token.Token
 	Key               Node
+	Colon             *token.Token
 	Value             Node
 	Comma             *token.Token
 	PrecedingComment  *CommentNode
@@ -570,7 +539,7 @@ func (b *builder) buildFlowMapping(preceding *CommentNode) Node {
 		if b.peek() == nil || b.peek().Type != token.MappingValueType {
 			panic(fmt.Sprintf("tree.Build: expected ':' after flow mapping key at line %d", open.Position.Line))
 		}
-		b.advance() // consume `:`
+		entry.Colon = b.advance()
 		if b.peek() == nil {
 			panic(fmt.Sprintf("tree.Build: flow mapping key with no value at line %d", open.Position.Line))
 		}
@@ -701,7 +670,7 @@ func (b *builder) buildMappingEntry(preceding *CommentNode) *MappingEntry {
 		panic(fmt.Sprintf("tree.Build: expected ':' after mapping key at line %d", entry.Key.(*ScalarNode).Token.Position.Line))
 	}
 	keyLine := colon.Position.Line
-	b.advance()
+	entry.Colon = b.advance()
 	// Value: scalar or null on the same line, or a nested container on subsequent lines.
 	t := b.peek()
 	if t == nil {

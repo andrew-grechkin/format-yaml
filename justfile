@@ -145,10 +145,19 @@ gen-tree-fixtures: build-probe-yaml
 @lint: cc
     go vet
 
-# Report functions over cyclomatic complexity 15 (installs gocyclo if missing)
+# Whole-program dead-code analysis over the cmd/ entry points. Flags functions that no reachable path calls -
+# useful for pruning the vendored internal/token and internal/scanner packages down to what our tree actually
+# needs. Installs golang.org/x/tools/cmd/deadcode if missing.
+@deadcode:
+    test -x "$XDG_CACHE_HOME/go/bin/deadcode" || GOBIN="$XDG_CACHE_HOME/go/bin" go install golang.org/x/tools/cmd/deadcode@latest
+    "$XDG_CACHE_HOME/go/bin/deadcode" ./cmd/probe-yaml/... ./cmd/tokenize-yaml/... ./cmd/emit-yaml/...
+
+# Report functions over cyclomatic complexity 15 (installs gocyclo if missing). Vendored goccy code under
+# internal/scanner and internal/token is excluded - we keep those files verbatim so we can diff against upstream
+# if we ever need to re-sync, and their complexity is not ours to fix.
 @cc:
     test -x "$XDG_CACHE_HOME/go/bin/gocyclo" || GOBIN="$XDG_CACHE_HOME/go/bin" go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-    "$XDG_CACHE_HOME/go/bin/gocyclo" -over 15 .
+    "$XDG_CACHE_HOME/go/bin/gocyclo" -over 15 -ignore 'internal/(scanner|token)' .
 
 # Update Go dependencies
 @update:

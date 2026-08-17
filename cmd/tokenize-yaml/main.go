@@ -11,9 +11,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/goccy/go-yaml/lexer"
-
 	"github.com/andrew-grechkin/update-yaml/pkg/dump"
+
+	"github.com/andrew-grechkin/format-yaml/internal/lexer"
 )
 
 func main() {

@@ -9,6 +9,23 @@
                 "Children": [
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 2,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 2
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -66,7 +83,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " null  ",
+                            "Origin": "null  ",
                             "Position": {
                               "Column": 4,
                               "IndentLevel": 0,
@@ -83,6 +100,23 @@
                   },
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ":  ",
+                          "Position": {
+                            "Column": 2,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 2,
+                            "Offset": 21
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": {
@@ -93,7 +127,7 @@
                                 "CharacterType": 0,
                                 "Error": "",
                                 "Indicator": 3,
-                                "Origin": "  # implicit null value, inline comment\n",
+                                "Origin": "# implicit null value, inline comment\n",
                                 "Position": {
                                   "Column": 5,
                                   "IndentLevel": 0,
@@ -143,6 +177,23 @@
                   },
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 2,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 3,
+                            "Offset": 62
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -180,7 +231,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " 42",
+                            "Origin": "42",
                             "Position": {
                               "Column": 4,
                               "IndentLevel": 0,

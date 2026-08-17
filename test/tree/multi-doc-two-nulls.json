@@ -21,7 +21,7 @@
                 "CharacterType": 2,
                 "Error": "",
                 "Indicator": 0,
-                "Origin": "---",
+                "Origin": "---\n",
                 "Position": {
                   "Column": 1,
                   "IndentLevel": 0,
@@ -56,7 +56,7 @@
                 "CharacterType": 2,
                 "Error": "",
                 "Indicator": 0,
-                "Origin": "\n---",
+                "Origin": "---",
                 "Position": {
                   "Column": 1,
                   "IndentLevel": 0,

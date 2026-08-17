@@ -9,6 +9,23 @@
                 "Children": [
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 12,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 12
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -43,7 +60,7 @@
                               "CharacterType": 0,
                               "Error": "",
                               "Indicator": 5,
-                              "Origin": " \u003e-\n",
+                              "Origin": "\u003e-\n  ",
                               "Position": {
                                 "Column": 14,
                                 "IndentLevel": 0,
@@ -62,7 +79,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": "  Wrap these lines\n  into one long line\n  with no trailing newline\n",
+                            "Origin": "Wrap these lines\n  into one long line\n  with no trailing newline\n",
                             "Position": {
                               "Column": 0,
                               "IndentLevel": 1,
@@ -79,6 +96,23 @@
                   },
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 5,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 5,
+                            "Offset": 87
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -116,7 +150,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " value",
+                            "Origin": "value",
                             "Position": {
                               "Column": 7,
                               "IndentLevel": 0,

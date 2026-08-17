@@ -9,7 +9,7 @@
                 "CharacterType": 2,
                 "Error": "",
                 "Indicator": 0,
-                "Origin": " 1.2",
+                "Origin": "1.2\n",
                 "Position": {
                   "Column": 7,
                   "IndentLevel": 0,
@@ -27,7 +27,7 @@
               "CharacterType": 2,
               "Error": "",
               "Indicator": 0,
-              "Origin": "YAML",
+              "Origin": "YAML ",
               "Position": {
                 "Column": 2,
                 "IndentLevel": 0,
@@ -49,6 +49,23 @@
                 "Children": [
                   {
                     "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ": ",
+                          "Position": {
+                            "Column": 4,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 3,
+                            "Offset": 18
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
                       "Comma": null,
                       "ExplicitKeyMarker": null,
                       "InlineComment": null,
@@ -62,7 +79,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": "\nkey",
+                            "Origin": "key",
                             "Position": {
                               "Column": 1,
                               "IndentLevel": 0,
@@ -86,7 +103,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " value",
+                            "Origin": "value",
                             "Position": {
                               "Column": 6,
                               "IndentLevel": 0,
@@ -119,7 +136,7 @@
                 "CharacterType": 2,
                 "Error": "",
                 "Indicator": 0,
-                "Origin": "\n---",
+                "Origin": "---\n",
                 "Position": {
                   "Column": 1,
                   "IndentLevel": 0,

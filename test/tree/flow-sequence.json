@@ -14,7 +14,7 @@
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ",",
+                          "Origin": ", ",
                           "Position": {
                             "Column": 7,
                             "IndentLevel": 0,
@@ -61,7 +61,7 @@
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ",",
+                          "Origin": ", ",
                           "Position": {
                             "Column": 13,
                             "IndentLevel": 0,
@@ -86,7 +86,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " beta",
+                            "Origin": "beta",
                             "Position": {
                               "Column": 9,
                               "IndentLevel": 0,
@@ -108,7 +108,7 @@
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ",",
+                          "Origin": ", ",
                           "Position": {
                             "Column": 17,
                             "IndentLevel": 0,
@@ -133,7 +133,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " 42",
+                            "Origin": "42",
                             "Position": {
                               "Column": 15,
                               "IndentLevel": 0,
@@ -164,7 +164,7 @@
                             "CharacterType": 2,
                             "Error": "",
                             "Indicator": 0,
-                            "Origin": " true",
+                            "Origin": "true",
                             "Position": {
                               "Column": 19,
                               "IndentLevel": 0,
