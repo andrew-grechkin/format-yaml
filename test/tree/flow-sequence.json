@@ -9,12 +9,17 @@
                 "Children": [
                   {
                     "SequenceItem": {
-                      "Comma": {
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
+                      "Marker": null,
+                      "Trailer": {
                         "Token": {
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ", ",
+                          "Origin": ",",
                           "Position": {
                             "Column": 7,
                             "IndentLevel": 0,
@@ -26,42 +31,48 @@
                           "Value": ","
                         }
                       },
-                      "InlineComment": null,
-                      "Marker": null,
-                      "PrecedingComment": null,
                       "Value": {
-                        "ScalarNode": {
+                        "StringNode": {
                           "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "alpha",
-                            "Position": {
-                              "Column": 2,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 2
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 31,
-                            "Value": "alpha"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "alpha",
+                              "Position": {
+                                "Column": 2,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 2
+                              },
+                              "Type": 31,
+                              "Value": "alpha"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
                   },
                   {
                     "SequenceItem": {
-                      "Comma": {
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
+                      "Marker": null,
+                      "Trailer": {
                         "Token": {
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ", ",
+                          "Origin": ",",
                           "Position": {
                             "Column": 13,
                             "IndentLevel": 0,
@@ -73,42 +84,48 @@
                           "Value": ","
                         }
                       },
-                      "InlineComment": null,
-                      "Marker": null,
-                      "PrecedingComment": null,
                       "Value": {
-                        "ScalarNode": {
+                        "StringNode": {
                           "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "beta",
-                            "Position": {
-                              "Column": 9,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 9
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 31,
-                            "Value": "beta"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " beta",
+                              "Position": {
+                                "Column": 9,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 9
+                              },
+                              "Type": 31,
+                              "Value": "beta"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
                   },
                   {
                     "SequenceItem": {
-                      "Comma": {
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
+                      "Marker": null,
+                      "Trailer": {
                         "Token": {
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 2,
-                          "Origin": ", ",
+                          "Origin": ",",
                           "Position": {
                             "Column": 17,
                             "IndentLevel": 0,
@@ -120,61 +137,66 @@
                           "Value": ","
                         }
                       },
-                      "InlineComment": null,
-                      "Marker": null,
-                      "PrecedingComment": null,
                       "Value": {
-                        "ScalarNode": {
-                          "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "42",
-                            "Position": {
-                              "Column": 15,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 15
+                        "IntNode": {
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 26,
-                            "Value": "42"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " 42",
+                              "Position": {
+                                "Column": 15,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 15
+                              },
+                              "Type": 26,
+                              "Value": "42"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
                   },
                   {
                     "SequenceItem": {
-                      "Comma": null,
-                      "InlineComment": null,
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
                       "Marker": null,
-                      "PrecedingComment": null,
+                      "Trailer": null,
                       "Value": {
-                        "ScalarNode": {
-                          "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "true",
-                            "Position": {
-                              "Column": 19,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 19
+                        "BoolNode": {
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 32,
-                            "Value": "true"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " true",
+                              "Position": {
+                                "Column": 19,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 19
+                              },
+                              "Type": 32,
+                              "Value": "true"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
@@ -185,7 +207,7 @@
                     "CharacterType": 0,
                     "Error": "",
                     "Indicator": 2,
-                    "Origin": "]",
+                    "Origin": "]\n",
                     "Position": {
                       "Column": 23,
                       "IndentLevel": 0,
@@ -197,7 +219,10 @@
                     "Value": "]"
                   }
                 },
-                "InlineComment": null,
+                "Comments": {
+                  "InlineComment": null,
+                  "PrecedingComment": null
+                },
                 "Open": {
                   "Token": {
                     "CharacterType": 0,
@@ -215,7 +240,6 @@
                     "Value": "["
                   }
                 },
-                "PrecedingComment": null,
                 "Style": 1
               }
             }

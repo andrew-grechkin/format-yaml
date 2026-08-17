@@ -14,7 +14,7 @@
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 1,
-                          "Origin": ": ",
+                          "Origin": ":",
                           "Position": {
                             "Column": 3,
                             "IndentLevel": 0,
@@ -26,54 +26,63 @@
                           "Value": ":"
                         }
                       },
-                      "Comma": null,
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
                       "ExplicitKeyMarker": null,
-                      "InlineComment": null,
                       "Key": {
-                        "ScalarNode": {
-                          "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "42",
-                            "Position": {
-                              "Column": 1,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 1
+                        "IntNode": {
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 26,
-                            "Value": "42"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "42",
+                              "Position": {
+                                "Column": 1,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 1
+                              },
+                              "Type": 26,
+                              "Value": "42"
+                            }
+                          },
+                          "Style": 0
                         }
                       },
-                      "PrecedingComment": null,
+                      "Trailer": null,
                       "Value": {
-                        "ScalarNode": {
+                        "StringNode": {
                           "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "forty-two\n",
-                            "Position": {
-                              "Column": 5,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 1,
-                              "Offset": 5
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 31,
-                            "Value": "forty-two"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " forty-two\n",
+                              "Position": {
+                                "Column": 5,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 5
+                              },
+                              "Type": 31,
+                              "Value": "forty-two"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
@@ -85,7 +94,7 @@
                           "CharacterType": 0,
                           "Error": "",
                           "Indicator": 1,
-                          "Origin": ": ",
+                          "Origin": ":",
                           "Position": {
                             "Column": 4,
                             "IndentLevel": 0,
@@ -97,63 +106,74 @@
                           "Value": ":"
                         }
                       },
-                      "Comma": null,
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
                       "ExplicitKeyMarker": null,
-                      "InlineComment": null,
                       "Key": {
-                        "ScalarNode": {
-                          "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "100",
-                            "Position": {
-                              "Column": 1,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 2,
-                              "Offset": 15
+                        "IntNode": {
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 26,
-                            "Value": "100"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "100",
+                              "Position": {
+                                "Column": 1,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 2,
+                                "Offset": 15
+                              },
+                              "Type": 26,
+                              "Value": "100"
+                            }
+                          },
+                          "Style": 0
                         }
                       },
-                      "PrecedingComment": null,
+                      "Trailer": null,
                       "Value": {
-                        "ScalarNode": {
+                        "StringNode": {
                           "Header": null,
-                          "InlineComment": null,
-                          "PrecedingComment": null,
-                          "Style": 0,
-                          "Token": {
-                            "CharacterType": 2,
-                            "Error": "",
-                            "Indicator": 0,
-                            "Origin": "hundred",
-                            "Position": {
-                              "Column": 6,
-                              "IndentLevel": 0,
-                              "IndentNum": 0,
-                              "Line": 2,
-                              "Offset": 20
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
                             },
-                            "Type": 31,
-                            "Value": "hundred"
-                          }
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " hundred\n",
+                              "Position": {
+                                "Column": 6,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 2,
+                                "Offset": 20
+                              },
+                              "Type": 31,
+                              "Value": "hundred"
+                            }
+                          },
+                          "Style": 0
                         }
                       }
                     }
                   }
                 ],
                 "Close": null,
-                "InlineComment": null,
+                "Comments": {
+                  "InlineComment": null,
+                  "PrecedingComment": null
+                },
                 "Open": null,
-                "PrecedingComment": null,
                 "Style": 0
               }
             }

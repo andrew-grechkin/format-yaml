@@ -1,0 +1,16 @@
+# comment before header
+
+# header preceding comment
+---  # header inline comment
+# comment after header
+
+
+# just island comment
+
+# key-value preceding comment
+key :  |+   # inline key-value comment
+  line 1
+  line 2
+
+
+# just island comment at the end of the doc

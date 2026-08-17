@@ -5,26 +5,30 @@
         "Doc": {
           "Children": [
             {
-              "ScalarNode": {
+              "StringNode": {
                 "Header": null,
-                "InlineComment": null,
-                "PrecedingComment": null,
-                "Style": 0,
-                "Token": {
-                  "CharacterType": 2,
-                  "Error": "",
-                  "Indicator": 0,
-                  "Origin": "hello world",
-                  "Position": {
-                    "Column": 1,
-                    "IndentLevel": 0,
-                    "IndentNum": 0,
-                    "Line": 1,
-                    "Offset": 1
+                "ScalarBase": {
+                  "Comments": {
+                    "InlineComment": null,
+                    "PrecedingComment": null
                   },
-                  "Type": 31,
-                  "Value": "hello world"
-                }
+                  "Token": {
+                    "CharacterType": 2,
+                    "Error": "",
+                    "Indicator": 0,
+                    "Origin": "hello world\n",
+                    "Position": {
+                      "Column": 1,
+                      "IndentLevel": 0,
+                      "IndentNum": 0,
+                      "Line": 1,
+                      "Offset": 1
+                    },
+                    "Type": 31,
+                    "Value": "hello world"
+                  }
+                },
+                "Style": 0
               }
             }
           ],

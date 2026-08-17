@@ -232,5 +232,38 @@ gen-fixtures: build
     done
     echo "Created $created fixture(s)." >&2
 
+# Stage-1 migration check: run format-yaml with FORMAT_YAML_TREE=1 over every -source.yaml fixture in every mode
+# and require byte-identical output. Introduced when zero passes were ported so the tree pipeline was pure
+# identity. As passes get ported this recipe goes progressively red (each new pass diverges its target fixtures
+# from source); that IS the migration progress signal, not a bug to fix in this recipe. Do NOT narrow scope or
+# add exceptions - create a new recipe for stage-specific checks instead. Deleted entirely once the goccy path
+# is removed and the tree pipeline becomes the default.
+test-int-tree: build
+    #!/usr/bin/env -S bash -Eeuo pipefail
+
+    bin="$XDG_CACHE_HOME/go/bin/$tool"
+    modes=(minimal standard full pedantic)
+
+    tmp=$(mktemp -d)
+    trap 'rm -rf "$tmp"' EXIT
+
+    fail=0
+    for source in test/fixtures/*-source.yaml; do
+        name=$(basename "$source" -source.yaml)
+        for mode in "${modes[@]}"; do
+            echo -n "Tree-mode $name/$mode... " >&2
+            got="$tmp/out.yaml"
+            FORMAT_YAML_TREE=1 FORMAT_YAML_MODE="$mode" "$bin" < "$source" > "$got"
+            if ! diff -q "$source" "$got" > /dev/null 2>&1; then
+                echo "✗ FAIL" >&2
+                diff -u --label "source" --label "tree-emitted" "$source" "$got" >&2 || true
+                fail=1
+                continue
+            fi
+            echo "✓ PASS" >&2
+        done
+    done
+    exit "$fail"
+
 # Run all tests
 test: lint test-unit test-int

@@ -13,324 +13,78 @@ import (
 	"fmt"
 
 	"github.com/andrew-grechkin/format-yaml/internal/lexer"
-	"github.com/andrew-grechkin/format-yaml/internal/token"
+	tokenizer "github.com/andrew-grechkin/format-yaml/internal/token"
 )
 
-// Node is the common interface every tree node satisfies. Data returns the semantic content of this node - for a
-// scalar leaf it's the parsed value; for structural nodes it's the recursive Go representation (map/slice/nil).
-// Access to source position, comments, and style stays on the concrete types.
-type Node interface {
-	Data() any
-	ToString() string
-}
-
-// Build parses src via our internal lexer (goccy fork), then constructs our tree. Panics if the token stream
+// Build parses src via internal lexer (goccy fork), then constructs tree. Panics if the token stream
 // carries any token type we don't yet handle - deliberate, so unsupported inputs surface immediately during
 // development instead of getting a silently-dropped subtree. Tokens arrive with our "trailing-only" Origin
 // invariant already applied (see lexer.TokenizeNormalized), so downstream emit is just Origin concatenation.
 func Build(src []byte) *File {
 	tokens := lexer.TokenizeNormalized(string(src))
+
 	b := &builder{tokens: tokens}
+
 	return b.buildFile()
 }
 
-// File is a YAML stream: an ordered list of children. Children can be Docs or EmptyNodes (island comments that sit
-// between docs, before the first doc, or after the last doc - stream-level comments that don't belong to any
-// particular document). Data only counts Docs; EmptyNodes are not documents.
-type File struct {
-	Children []Node
+type iterator struct {
+	tokens tokenizer.Tokens
+	idx    int
+	commentStash *CommentNode
 }
 
-func (f *File) Data() any {
-	out := make([]any, 0)
-	for _, c := range f.Children {
-		if _, ok := c.(*EmptyNode); ok {
-			continue
-		}
-		out = append(out, c.Data())
-	}
-	return out
-}
-
-// Doc is a single YAML document. Header/Footer are typed attributes (single, nilable) so the tree can't hold more
-// than one of each - preventing whole classes of malformed-tree bugs at compile time. Children is the ordered list
-// of everything inside the doc: the body node (ScalarNode, NullNode, and later MappingNode/SequenceNode) plus any
-// EmptyNodes for island comments that render between/around it. YAML forbids more than one body-typed child; the
-// builder enforces that.
-type Doc struct {
-	Header   *DocHeader
-	Children []Node
-	Footer   *DocFooter
-}
-
-func (d *Doc) Data() any {
-	for _, c := range d.Children {
-		if _, ok := c.(*EmptyNode); ok {
-			continue
-		}
-		return c.Data()
-	}
-	return nil
-}
-
-// DocHeader represents the `---` marker at the start of a document. PrecedingComment holds any comment group that
-// sat above the marker in source; InlineComment holds a same-line trailing comment (`--- # note`).
-type DocHeader struct {
-	Token            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (*DocHeader) Data() any { return nil }
-
-// DocFooter represents the `...` marker at the end of a document. Same comment-slot semantics as DocHeader.
-type DocFooter struct {
-	Token            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (*DocFooter) Data() any { return nil }
-
-// EmptyNode is a positional slot with no body content - a place in the tree that carries a floating comment. Used
-// when a comment is blank-line-separated from any subsequent content, or when a comment sits at the tail of a
-// container with nothing to attach forward to. The node itself renders nothing; PrecedingComment carries the text
-// on emit.
-type EmptyNode struct {
-	PrecedingComment *CommentNode
-}
-
-func (*EmptyNode) Data() any { return nil }
-
-// ScalarStyle is a rendering choice for a scalar leaf. Same semantic content across all styles; the emitter picks
-// bytes based on the flag.
-type ScalarStyle int
-
-const (
-	ScalarPlain        ScalarStyle = iota // bare: `hello`
-	ScalarSingleQuoted                    // 'hello'
-	ScalarDoubleQuoted                    // "hello"
-	ScalarLiteral                         // |, |+, |-
-	ScalarFolded                          // >, >+, >-
-)
-
-// ScalarNode is a leaf value: string, integer, float, bool, infinity, nan, or block-scalar text. Null uses NullNode
-// instead so null-vs-missing is a type distinction, not a value check. Header is the block-scalar indicator token
-// (`|`, `>`, or their chomp variants) - nil for plain/quoted styles, populated for ScalarLiteral/ScalarFolded so
-// the chomp modifier and its source position round-trip.
-type ScalarNode struct {
-	Style            ScalarStyle
-	Token            *token.Token
-	Header           *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (s *ScalarNode) Data() any {
-	if s.Token == nil {
+func (i *iterator) peek() *tokenizer.Token {
+	if i.idx >= len(i.tokens) {
 		return nil
 	}
-	return s.Token.Value
+	return i.tokens[i.idx]
 }
 
-// NullNode represents an explicit or implicit YAML null. Distinct type so callers can distinguish "explicit null in
-// source" from a Go zero-value.
-type NullNode struct {
-	Token            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
+func (i *iterator) next() bool {
+	t := i.peek()
+	i.idx++
+	return t
 }
 
-func (*NullNode) Data() any { return nil }
+func (i *iterator) buildFile1() *File {
+	result := &File{}
 
-// Style is a rendering choice for container nodes: block layout (indented, one entry per line) or flow layout
-// (inline, comma-separated). Same semantic content either way; the emitter picks bytes based on the flag.
-type Style int
-
-const (
-	StyleBlock Style = iota
-	StyleFlow
-)
-
-// MappingNode is a YAML mapping (key-value collection). Children hold MappingEntry values (the entries themselves)
-// and EmptyNodes for any island comments that sit between entries. Open/Close carry the `{`/`}` tokens for flow
-// style (nil for block); we keep the tokens rather than emitting literals because their Origins carry the
-// leading whitespace between the container and whatever precedes it.
-type MappingNode struct {
-	Style            Style
-	Open             *token.Token
-	Children         []Node
-	Close            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (m *MappingNode) Data() any {
-	out := make(map[string]any, len(m.Children))
-	for _, c := range m.Children {
-		e, ok := c.(*MappingEntry)
-		if !ok {
-			continue
-		}
-		key := ""
-		if e.Key != nil {
-			if s, ok := e.Key.Data().(string); ok {
-				key = s
+	for token := i.next(); token != nil; token = i.next() {
+		if token.Type == tokenizer.CommentType {
+			if i.commentStash != nil {
+				result.Children = append(result.Children, EmptyNode())
 			}
-		}
-		if e.Value != nil {
-			out[key] = e.Value.Data()
-		} else {
-			out[key] = nil
-		}
-	}
-	return out
-}
 
-// MappingEntry is a single key/value pair inside a MappingNode. ExplicitKeyMarker is populated when the entry
-// used the `? key\n: value` form; nil for the common `key: value` shape. Colon carries the `:` token itself so
-// its Origin (which under our trailing-only tokenizer contract holds the whitespace/newline separating key from
-// value) round-trips verbatim - synthesizing `":"` in emit would drop that separator. Comma carries the `,` token
-// that followed this entry inside a flow mapping (nil for block or the last flow entry).
-type MappingEntry struct {
-	ExplicitKeyMarker *token.Token
-	Key               Node
-	Colon             *token.Token
-	Value             Node
-	Comma             *token.Token
-	PrecedingComment  *CommentNode
-	InlineComment     *CommentNode
-}
-
-func (e *MappingEntry) Data() any {
-	if e.Value == nil {
-		return nil
-	}
-	return e.Value.Data()
-}
-
-// SequenceNode is a YAML sequence (ordered list). Children hold SequenceItem values plus any EmptyNodes for island
-// comments between items. Open/Close carry the `[`/`]` tokens for flow style; nil for block.
-type SequenceNode struct {
-	Style            Style
-	Open             *token.Token
-	Children         []Node
-	Close            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (s *SequenceNode) Data() any {
-	out := make([]any, 0, len(s.Children))
-	for _, c := range s.Children {
-		if _, ok := c.(*EmptyNode); ok {
+			i.commentStash = i.StandaloneCommentsGroup()
 			continue
 		}
-		out = append(out, c.Data())
+
 	}
-	return out
-}
 
-// SequenceItem wraps a single sequence entry so its `-` marker (block style) can be preserved verbatim, along with
-// its own comment slots. Flow-style items still use SequenceItem for uniformity - Marker is nil there. Comma
-// carries the `,` following this item in a flow sequence.
-type SequenceItem struct {
-	Marker           *token.Token
-	Value            Node
-	Comma            *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (i *SequenceItem) Data() any {
-	if i.Value == nil {
-		return nil
+	if i.commentStash != nil {
+		result.Children = append(result.Children, EmptyNode(i.commentStash))
 	}
-	return i.Value.Data()
 }
 
-// TagNode wraps a value with a YAML tag (`!tag`, `!!str`, `!<uri>`). Tag is the tag indicator token; Value is the
-// tagged node. Data() returns the underlying Value's Data (tagging is a type-annotation, not its own semantic
-// content). Can coexist with AnchorNode by nesting (tag outside anchor or vice versa - both are wrappers).
-type TagNode struct {
-	Tag              *token.Token
-	Value            Node
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (t *TagNode) Data() any {
-	if t.Value == nil {
-		return nil
-	}
-	return t.Value.Data()
-}
-
-// DirectiveNode is a stream-level `%NAME args` directive (`%YAML 1.2`, `%TAG !e! tag:...`). Lives in File.Children,
-// not inside any Doc. Data() returns nil - directives affect parsing, not semantic content.
-type DirectiveNode struct {
-	Name *token.Token
-	Args []*token.Token
-}
-
-func (*DirectiveNode) Data() any { return nil }
-
-// AnchorNode wraps another node with an anchor name (`&name`). The Value field is the actual anchored content,
-// which can be any node type. Amp holds the `&` token so its Origin (with any leading whitespace) round-trips
-// verbatim. Data() returns the Value's Data - the anchor is a labeling wrapper, not its own semantic content.
-type AnchorNode struct {
-	Amp              *token.Token
-	Name             *token.Token
-	Value            Node
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (a *AnchorNode) Data() any {
-	if a.Value == nil {
-		return nil
-	}
-	return a.Value.Data()
-}
-
-// AliasNode is a reference to a previously-defined anchor (`*name`). Resolution to the referenced value is a
-// downstream concern (the tree itself doesn't chase aliases); Data() returns nil so callers who need the resolved
-// value do their own lookup via the anchor name. Star holds the `*` token so its Origin round-trips.
-type AliasNode struct {
-	Star             *token.Token
-	Name             *token.Token
-	PrecedingComment *CommentNode
-	InlineComment    *CommentNode
-}
-
-func (*AliasNode) Data() any { return nil }
-
-// CommentNode is one comment group - a run of contiguous comment lines (no blank lines between them) that share a
-// single attribution target. Lines holds one token per source line, in order. A blank-line-separated set of comment
-// lines is TWO CommentNodes attached to different targets, not one CommentNode with a gap inside it.
-type CommentNode struct {
-	Lines []*token.Token
-}
-
-func (*CommentNode) Data() any { return nil }
 
 // builder walks the token stream sequentially. groups holds the not-yet-attached comment groups in source order.
 // The last group is "still open" - subsequent contiguous comment lines extend it; a non-comment or a line gap
 // closes it and starts a new one on the next comment.
 type builder struct {
-	tokens token.Tokens
+	tokens tokenizer.Tokens
 	idx    int
 	groups []*CommentNode
 }
 
-func (b *builder) peek() *token.Token {
+func (b *builder) peek() *tokenizer.Token {
 	if b.idx >= len(b.tokens) {
 		return nil
 	}
 	return b.tokens[b.idx]
 }
 
-func (b *builder) advance() *token.Token {
+func (b *builder) advance() *tokenizer.Token {
 	t := b.tokens[b.idx]
 	b.idx++
 	return t
@@ -342,23 +96,31 @@ func (b *builder) advance() *token.Token {
 // header's PrecedingComment. Trailing groups at end-of-stream flush as File-level EmptyNodes.
 func (b *builder) buildFile() *File {
 	file := &File{}
+
 	for b.idx < len(b.tokens) {
-		b.absorbComments()
+		b.absorbStandaloneCommentsGroup()
+
 		if b.peek() == nil {
 			break
 		}
-		if b.peek().Type == token.DirectiveType {
+
+		if b.peek().Type == tokenizer.DirectiveType {
 			file.Children = append(file.Children, b.buildDirective())
 			continue
 		}
+
 		file.Children = append(file.Children, b.drainGroupsAdjacentTo(b.peek().Position.Line)...)
+
 		doc := b.buildDoc()
 		if doc == nil {
 			break
 		}
+
 		file.Children = append(file.Children, doc)
 	}
+
 	file.Children = append(file.Children, b.drainGroupsAsEmpties()...)
+
 	return file
 }
 
@@ -384,20 +146,25 @@ func (b *builder) buildDoc() *Doc {
 	if b.peek() == nil {
 		return nil
 	}
+
 	doc := &Doc{}
-	if b.peek().Type == token.DocumentHeaderType {
+	if b.peek().Type == tokenizer.DocumentHeaderType {
 		line := b.peek().Position.Line
 		preceding := b.takeAdjacentGroup(line)
-		doc.Header = &DocHeader{Token: b.advance(), PrecedingComment: preceding}
+
+		doc.Header = &DocHeader{Token: b.advance()}
+		doc.Header.PrecedingComment = preceding
 		doc.Header.InlineComment = b.takeInlineOn(doc.Header.Token.Position.Line)
-		b.absorbComments()
+
+		b.absorbStandaloneCommentsGroup()
 	}
-	if t := b.peek(); t != nil && t.Type != token.DocumentEndType && t.Type != token.DocumentHeaderType {
+
+	if t := b.peek(); t != nil && t.Type != tokenizer.DocumentEndType && t.Type != tokenizer.DocumentHeaderType {
 		line := t.Position.Line
 		doc.Children = append(doc.Children, b.drainGroupsAdjacentTo(line)...)
 		preceding := b.takeAdjacentGroup(line)
 		doc.Children = append(doc.Children, b.buildBody(preceding))
-		b.absorbComments()
+		b.absorbStandaloneCommentsGroup()
 	} else {
 		// No body-typed token for this doc - synthesize an implicit NullNode so every doc has a body child. A null
 		// body carries any adjacent preceding comment left in b.groups (the group that would have attached to a
@@ -407,8 +174,11 @@ func (b *builder) buildDoc() *Doc {
 			line = doc.Header.Token.Position.Line + 1
 		}
 		preceding := b.takeAdjacentGroup(line)
-		doc.Children = append(doc.Children, &NullNode{PrecedingComment: preceding})
+		n := &NullNode{}
+		n.PrecedingComment = preceding
+		doc.Children = append(doc.Children, n)
 	}
+
 	// End-of-doc handling. Groups still pending here split by adjacency to whatever follows:
 	//   - end of stream: no target - drain everything as trailing EmptyNode children.
 	//   - `...` footer next: non-adjacent groups become EmptyNode children in this doc; the adjacent group (if any)
@@ -420,10 +190,12 @@ func (b *builder) buildDoc() *Doc {
 	} else {
 		doc.Children = append(doc.Children, b.drainGroupsAdjacentTo(t.Position.Line)...)
 	}
-	if t := b.peek(); t != nil && t.Type == token.DocumentEndType {
+	if t := b.peek(); t != nil && t.Type == tokenizer.DocumentEndType {
 		line := t.Position.Line
 		preceding := b.takeAdjacentGroup(line)
-		doc.Footer = &DocFooter{Token: b.advance(), PrecedingComment: preceding}
+		f := &DocFooter{Token: b.advance()}
+		f.PrecedingComment = preceding
+		doc.Footer = f
 		doc.Footer.InlineComment = b.takeInlineOn(doc.Footer.Token.Position.Line)
 	}
 	if doc.Header == nil && doc.Footer == nil && len(doc.Children) == 0 {
@@ -437,22 +209,22 @@ func (b *builder) buildDoc() *Doc {
 // makes it a mapping. Panics on any token type not yet supported.
 func (b *builder) buildBody(preceding *CommentNode) Node {
 	t := b.peek()
-	if t.Type == token.TagType {
+	if t.Type == tokenizer.TagType {
 		return b.buildTag(preceding)
 	}
-	if t.Type == token.AnchorType {
+	if t.Type == tokenizer.AnchorType {
 		return b.buildAnchor(preceding)
 	}
-	if t.Type == token.AliasType {
+	if t.Type == tokenizer.AliasType {
 		return b.buildAlias(preceding)
 	}
-	if t.Type == token.SequenceEntryType {
+	if t.Type == tokenizer.SequenceEntryType {
 		return b.buildBlockSequence(preceding)
 	}
-	if t.Type == token.SequenceStartType {
+	if t.Type == tokenizer.SequenceStartType {
 		return b.buildFlowSequence(preceding)
 	}
-	if t.Type == token.MappingStartType {
+	if t.Type == tokenizer.MappingStartType {
 		return b.buildFlowMapping(preceding)
 	}
 	if b.isMappingKeyHere() {
@@ -470,20 +242,28 @@ func (b *builder) buildAnchor(preceding *CommentNode) Node {
 	}
 	name := b.advance()
 	if b.peek() == nil {
-		return &AnchorNode{Amp: amp, Name: name, Value: &NullNode{}, PrecedingComment: preceding}
+		a := &AnchorNode{Amp: amp, Name: name, Value: &NullNode{}}
+		a.PrecedingComment = preceding
+		return a
 	}
 	value := b.buildBody(nil)
-	return &AnchorNode{Amp: amp, Name: name, Value: value, PrecedingComment: preceding}
+	a := &AnchorNode{Amp: amp, Name: name, Value: value}
+	a.PrecedingComment = preceding
+	return a
 }
 
 // buildTag consumes `!tag` and the value it tags. The tag is a standalone token followed by any body kind.
 func (b *builder) buildTag(preceding *CommentNode) Node {
 	tag := b.advance()
 	if b.peek() == nil {
-		return &TagNode{Tag: tag, Value: &NullNode{}, PrecedingComment: preceding}
+		t := &TagNode{Tag: tag, Value: &NullNode{}}
+		t.PrecedingComment = preceding
+		return t
 	}
 	value := b.buildBody(nil)
-	return &TagNode{Tag: tag, Value: value, PrecedingComment: preceding}
+	t := &TagNode{Tag: tag, Value: value}
+	t.PrecedingComment = preceding
+	return t
 }
 
 // buildAlias consumes `*name` - a reference to a previously-defined anchor. Resolution is left to callers.
@@ -493,7 +273,8 @@ func (b *builder) buildAlias(preceding *CommentNode) Node {
 		panic(fmt.Sprintf("tree.Build: alias `*` at line %d not followed by a name", star.Position.Line))
 	}
 	name := b.advance()
-	a := &AliasNode{Star: star, Name: name, PrecedingComment: preceding}
+	a := &AliasNode{Star: star, Name: name}
+	a.PrecedingComment = preceding
 	a.InlineComment = b.takeInlineOn(name.Position.Line)
 	return a
 }
@@ -502,18 +283,19 @@ func (b *builder) buildAlias(preceding *CommentNode) Node {
 // (nested flow container, scalar, null). Commas separate items; trailing comma before `]` is allowed by YAML.
 func (b *builder) buildFlowSequence(preceding *CommentNode) Node {
 	open := b.advance() // consume `[`
-	s := &SequenceNode{Style: StyleFlow, Open: open, PrecedingComment: preceding}
+	s := &SequenceNode{Style: StyleFlow, Open: open}
+	s.PrecedingComment = preceding
 	for {
 		if b.peek() == nil {
 			panic(fmt.Sprintf("tree.Build: unterminated flow sequence started at line %d", open.Position.Line))
 		}
-		if b.peek().Type == token.SequenceEndType {
+		if b.peek().Type == tokenizer.SequenceEndType {
 			s.Close = b.advance()
 			break
 		}
 		item := &SequenceItem{Value: b.buildBody(nil)}
-		if b.peek() != nil && b.peek().Type == token.CollectEntryType {
-			item.Comma = b.advance()
+		if b.peek() != nil && b.peek().Type == tokenizer.CollectEntryType {
+			item.Trailer = b.advance()
 		}
 		s.Children = append(s.Children, item)
 	}
@@ -525,18 +307,19 @@ func (b *builder) buildFlowSequence(preceding *CommentNode) Node {
 // Key can be any scalar; value can be any body node.
 func (b *builder) buildFlowMapping(preceding *CommentNode) Node {
 	open := b.advance() // consume `{`
-	m := &MappingNode{Style: StyleFlow, Open: open, PrecedingComment: preceding}
+	m := &MappingNode{Style: StyleFlow, Open: open}
+	m.PrecedingComment = preceding
 	for {
 		if b.peek() == nil {
 			panic(fmt.Sprintf("tree.Build: unterminated flow mapping started at line %d", open.Position.Line))
 		}
-		if b.peek().Type == token.MappingEndType {
+		if b.peek().Type == tokenizer.MappingEndType {
 			m.Close = b.advance()
 			break
 		}
 		entry := &MappingEntry{}
 		entry.Key = b.buildScalar(nil)
-		if b.peek() == nil || b.peek().Type != token.MappingValueType {
+		if b.peek() == nil || b.peek().Type != tokenizer.MappingValueType {
 			panic(fmt.Sprintf("tree.Build: expected ':' after flow mapping key at line %d", open.Position.Line))
 		}
 		entry.Colon = b.advance()
@@ -544,8 +327,8 @@ func (b *builder) buildFlowMapping(preceding *CommentNode) Node {
 			panic(fmt.Sprintf("tree.Build: flow mapping key with no value at line %d", open.Position.Line))
 		}
 		entry.Value = b.buildBody(nil)
-		if b.peek() != nil && b.peek().Type == token.CollectEntryType {
-			entry.Comma = b.advance()
+		if b.peek() != nil && b.peek().Type == tokenizer.CollectEntryType {
+			entry.Trailer = b.advance()
 		}
 		m.Children = append(m.Children, entry)
 	}
@@ -560,74 +343,172 @@ func (b *builder) isMappingKeyHere() bool {
 	if b.idx+1 >= len(b.tokens) {
 		return false
 	}
-	if b.tokens[b.idx].Type == token.MappingKeyType {
+	if b.tokens[b.idx].Type == tokenizer.MappingKeyType {
 		return true
 	}
 	if !isScalarType(b.tokens[b.idx].Type) {
 		return false
 	}
-	return b.tokens[b.idx+1].Type == token.MappingValueType
+	return b.tokens[b.idx+1].Type == tokenizer.MappingValueType
 }
 
-func isScalarType(t token.Type) bool {
+func isScalarType(t tokenizer.Type) bool {
 	switch t {
-	case token.NullType, token.ImplicitNullType,
-		token.StringType, token.SingleQuoteType, token.DoubleQuoteType,
-		token.BoolType,
-		token.IntegerType, token.BinaryIntegerType, token.OctetIntegerType, token.HexIntegerType,
-		token.FloatType, token.InfinityType, token.NanType,
-		token.MergeKeyType:
+	case tokenizer.NullType, tokenizer.ImplicitNullType,
+		tokenizer.StringType, tokenizer.SingleQuoteType, tokenizer.DoubleQuoteType,
+		tokenizer.BoolType,
+		tokenizer.IntegerType, tokenizer.BinaryIntegerType, tokenizer.OctetIntegerType, tokenizer.HexIntegerType,
+		tokenizer.FloatType, tokenizer.InfinityType, tokenizer.NanType,
+		tokenizer.MergeKeyType:
 		return true
 	}
 	return false
 }
 
-// buildScalar consumes one scalar or null token as a leaf node with the given PrecedingComment. Also handles block
-// scalars (`|` and `>` variants), which arrive as two consecutive tokens (header + body); the pair becomes a single
-// BlockScalarNode.
+// buildScalar consumes one scalar or null token as a leaf node with the given PrecedingComment. Dispatches to
+// the typed scalar constructor based on token type: NullType/ImplicitNullType -> NullNode; block-scalar
+// headers (`|`, `>`) -> StringNode with block style; the remaining scalar-typed tokens -> IntNode/FloatNode/
+// BoolNode/StringNode as classified by the tokenizer.
 func (b *builder) buildScalar(preceding *CommentNode) Node {
 	t := b.peek()
 	switch t.Type {
-	case token.NullType, token.ImplicitNullType:
-		n := &NullNode{Token: b.advance(), PrecedingComment: preceding}
+	case tokenizer.NullType, tokenizer.ImplicitNullType:
+		tok := b.advance()
+		n := &NullNode{Style: nullStyleFor(tok.Type, tok.Origin)}
+		n.Token = tok
+		n.PrecedingComment = preceding
 		n.InlineComment = b.takeInlineOn(n.Token.Position.Line)
 		return n
-	case token.LiteralType, token.FoldedType:
+	case tokenizer.LiteralType, tokenizer.FoldedType:
 		header := b.advance()
-		style := ScalarLiteral
-		if t.Type == token.FoldedType {
-			style = ScalarFolded
+		style := StringLiteral
+		if t.Type == tokenizer.FoldedType {
+			style = StringFolded
 		}
-		s := &ScalarNode{Style: style, Header: header, PrecedingComment: preceding}
+		s := &StringNode{Style: style, Header: header}
+		s.PrecedingComment = preceding
 		// A same-line comment after the header is inline on the header, not the body. The body (if any) sits on
 		// subsequent lines.
 		s.InlineComment = b.takeInlineOn(header.Position.Line)
-		if next := b.peek(); next != nil && next.Type != token.CommentType && next.Position.Line != header.Position.Line {
+		if next := b.peek(); next != nil && next.Type != tokenizer.CommentType && next.Position.Line != header.Position.Line {
 			s.Token = b.advance()
 		}
 		return s
-	case token.StringType, token.SingleQuoteType, token.DoubleQuoteType,
-		token.BoolType,
-		token.IntegerType, token.BinaryIntegerType, token.OctetIntegerType, token.HexIntegerType,
-		token.FloatType, token.InfinityType, token.NanType,
-		token.MergeKeyType:
-		s := &ScalarNode{Style: scalarStyleFor(t.Type), Token: b.advance(), PrecedingComment: preceding}
+	case tokenizer.StringType, tokenizer.SingleQuoteType, tokenizer.DoubleQuoteType, tokenizer.MergeKeyType:
+		s := &StringNode{Style: stringStyleFor(t.Type)}
+		s.Token = b.advance()
+		s.PrecedingComment = preceding
 		s.InlineComment = b.takeInlineOn(s.Token.Position.Line)
 		return s
+	case tokenizer.IntegerType, tokenizer.BinaryIntegerType, tokenizer.OctetIntegerType, tokenizer.HexIntegerType:
+		tok := b.advance()
+		n := &IntNode{Style: intStyleFor(tok.Type)}
+		n.Token = tok
+		n.PrecedingComment = preceding
+		n.InlineComment = b.takeInlineOn(n.Token.Position.Line)
+		return n
+	case tokenizer.FloatType, tokenizer.InfinityType, tokenizer.NanType:
+		tok := b.advance()
+		n := &FloatNode{Style: floatStyleFor(tok.Type)}
+		n.Token = tok
+		n.PrecedingComment = preceding
+		n.InlineComment = b.takeInlineOn(n.Token.Position.Line)
+		return n
+	case tokenizer.BoolType:
+		tok := b.advance()
+		n := &BoolNode{Style: boolStyleFor(tok.Origin)}
+		n.Token = tok
+		n.PrecedingComment = preceding
+		n.InlineComment = b.takeInlineOn(n.Token.Position.Line)
+		return n
 	}
 	panic(fmt.Sprintf("tree.Build: unsupported token type %v at line %d (%q)", t.Type, t.Position.Line, t.Value))
 }
 
-// scalarStyleFor maps a scalar token type to its rendering style. Block scalar headers are handled separately in
-// buildScalar since they arrive as a header + body pair, not a single scalar token.
-func scalarStyleFor(t token.Type) ScalarStyle {
+// stringStyleFor maps a string-scalar token type to its StringStyle. Block scalar headers (`|`/`>`) are
+// handled separately in buildScalar since they arrive as a header + body pair.
+func stringStyleFor(t tokenizer.Type) StringStyle {
 	switch t {
-	case token.SingleQuoteType:
-		return ScalarSingleQuoted
-	case token.DoubleQuoteType:
-		return ScalarDoubleQuoted
+	case tokenizer.SingleQuoteType:
+		return StringSingleQuoted
+	case tokenizer.DoubleQuoteType:
+		return StringDoubleQuoted
 	}
-	return ScalarPlain
+	return StringPlain
+}
+
+// intStyleFor maps an integer-scalar token type to its IntStyle. Straight enum-to-enum since the tokenizer
+// already distinguishes the four bases.
+func intStyleFor(t tokenizer.Type) IntStyle {
+	switch t {
+	case tokenizer.HexIntegerType:
+		return IntHex
+	case tokenizer.OctetIntegerType:
+		return IntOctal
+	case tokenizer.BinaryIntegerType:
+		return IntBinary
+	}
+	return IntDecimal
+}
+
+// floatStyleFor maps a float-scalar token type to its FloatStyle.
+func floatStyleFor(t tokenizer.Type) FloatStyle {
+	switch t {
+	case tokenizer.InfinityType:
+		return FloatInfinity
+	case tokenizer.NanType:
+		return FloatNaN
+	}
+	return FloatRegular
+}
+
+// boolStyleFor inspects the raw content of a bool token's Origin (stripped of leading/trailing whitespace) to
+// pick the lexeme case. The tokenizer lumps all bool spellings under BoolType so we look at bytes.
+func boolStyleFor(origin string) BoolStyle {
+	switch scalarLexeme(origin) {
+	case "True", "False":
+		return BoolTitle
+	case "TRUE", "FALSE":
+		return BoolUpper
+	}
+	return BoolLower
+}
+
+// nullStyleFor picks the null lexeme's Style from the token type + Origin. NullImplicit is a distinct token
+// type; the other four share NullType and differ only in spelling.
+func nullStyleFor(t tokenizer.Type, origin string) NullStyle {
+	if t == tokenizer.ImplicitNullType {
+		return NullImplicit
+	}
+	switch scalarLexeme(origin) {
+	case "~":
+		return NullTilde
+	case "Null":
+		return NullTitle
+	case "NULL":
+		return NullUpper
+	}
+	return NullLower
+}
+
+// scalarLexeme strips leading whitespace (spaces/tabs) and takes the content up to the first whitespace
+// character. Used by Style-detection helpers to isolate the "value" bytes of a token's Origin when the
+// tokenizer's Value field doesn't preserve the source case.
+func scalarLexeme(origin string) string {
+	i := 0
+	for i < len(origin) && (origin[i] == ' ' || origin[i] == '\t') {
+		i++
+	}
+	body := origin[i:]
+	j := 0
+	for j < len(body) {
+		c := body[j]
+		if c == ' ' || c == '\t' || c == '\n' || c == '\r' {
+			break
+		}
+		j++
+	}
+	return body[:j]
 }
 
 // buildBlockMapping consumes a run of block-style `key: value` entries at the same indent column. Stops when the
@@ -636,10 +517,11 @@ func scalarStyleFor(t token.Type) ScalarStyle {
 // the MappingEntry via the same adjacency rules used elsewhere. Any trailing comment groups at the mapping's tail
 // become EmptyNode children of the mapping (their visual home is inside the container that just ended).
 func (b *builder) buildBlockMapping(preceding *CommentNode) Node {
-	m := &MappingNode{Style: StyleBlock, PrecedingComment: preceding}
+	m := &MappingNode{Style: StyleBlock}
+	m.PrecedingComment = preceding
 	baseCol := b.peek().Position.Column
 	for {
-		b.absorbComments()
+		b.absorbStandaloneCommentsGroup()
 		if b.peek() == nil {
 			break
 		}
@@ -659,15 +541,16 @@ func (b *builder) buildBlockMapping(preceding *CommentNode) Node {
 // on subsequent lines at a deeper indent. Handles both implicit (`key: value`) and explicit (`? key\n: value`)
 // forms; the explicit `?` marker is preserved on the entry for round-trip.
 func (b *builder) buildMappingEntry(preceding *CommentNode) *MappingEntry {
-	entry := &MappingEntry{PrecedingComment: preceding}
-	if b.peek() != nil && b.peek().Type == token.MappingKeyType {
+	entry := &MappingEntry{}
+	entry.PrecedingComment = preceding
+	if b.peek() != nil && b.peek().Type == tokenizer.MappingKeyType {
 		entry.ExplicitKeyMarker = b.advance()
 	}
 	entry.Key = b.buildScalar(nil)
 	// Consume the `:` separator.
 	colon := b.peek()
-	if colon == nil || colon.Type != token.MappingValueType {
-		panic(fmt.Sprintf("tree.Build: expected ':' after mapping key at line %d", entry.Key.(*ScalarNode).Token.Position.Line))
+	if colon == nil || colon.Type != tokenizer.MappingValueType {
+		panic(fmt.Sprintf("tree.Build: expected ':' after mapping key at line %d", TokenOf(entry.Key).Position.Line))
 	}
 	keyLine := colon.Position.Line
 	entry.Colon = b.advance()
@@ -678,7 +561,7 @@ func (b *builder) buildMappingEntry(preceding *CommentNode) *MappingEntry {
 		return entry
 	}
 	if t.Position.Line == keyLine {
-		if t.Type == token.CommentType {
+		if t.Type == tokenizer.CommentType {
 			// `key:            # inline comment` - implicit null value, comment attaches inline.
 			entry.Value = &NullNode{}
 		} else {
@@ -688,9 +571,17 @@ func (b *builder) buildMappingEntry(preceding *CommentNode) *MappingEntry {
 		}
 	} else {
 		// Nested container or scalar on next line.
-		b.absorbComments()
+		b.absorbStandaloneCommentsGroup()
 		nested := b.peek()
 		if nested == nil {
+			entry.Value = &NullNode{}
+			return entry
+		}
+		// Column check: a following token at the same or shallower column as our key is a SIBLING (or belongs
+		// to an enclosing container), not a nested value. Common case: `a:\nb: 1` at column 1 - `b` is a
+		// sibling of `a`, and `a`'s value is implicit null. Without this guard the builder greedily consumes
+		// `b: 1` as `a`'s nested mapping value, mismatching goccy's parser and YAML semantics.
+		if nested.Position.Column <= TokenOf(entry.Key).Position.Column {
 			entry.Value = &NullNode{}
 			return entry
 		}
@@ -715,24 +606,26 @@ func (b *builder) buildMappingEntry(preceding *CommentNode) *MappingEntry {
 // buildBlockMapping: dedent, doc marker, non-sequence-entry-token, or EOF. Trailing groups become EmptyNode
 // children of this sequence.
 func (b *builder) buildBlockSequence(preceding *CommentNode) Node {
-	s := &SequenceNode{Style: StyleBlock, PrecedingComment: preceding}
+	s := &SequenceNode{Style: StyleBlock}
+	s.PrecedingComment = preceding
 	baseCol := b.peek().Position.Column
 	defer func() {
 		s.Children = append(s.Children, b.trailingEmptiesAtContainerEnd()...)
 	}()
 	for {
-		b.absorbComments()
+		b.absorbStandaloneCommentsGroup()
 		if b.peek() == nil {
 			break
 		}
-		if b.peek().Type != token.SequenceEntryType || b.peek().Position.Column != baseCol {
+		if b.peek().Type != tokenizer.SequenceEntryType || b.peek().Position.Column != baseCol {
 			break
 		}
 		itemMarkerLine := b.peek().Position.Line
 		s.Children = append(s.Children, b.drainGroupsAdjacentTo(itemMarkerLine)...)
 		itemPreceding := b.takeAdjacentGroup(itemMarkerLine)
 		marker := b.advance() // consume `-`
-		item := &SequenceItem{Marker: marker, PrecedingComment: itemPreceding}
+		item := &SequenceItem{Marker: marker}
+		item.PrecedingComment = itemPreceding
 		t := b.peek()
 		switch {
 		case t == nil:
@@ -742,7 +635,7 @@ func (b *builder) buildBlockSequence(preceding *CommentNode) Node {
 			item.Value = b.buildBody(nil)
 		default:
 			// Nested content on next line.
-			b.absorbComments()
+			b.absorbStandaloneCommentsGroup()
 			nested := b.peek()
 			if nested == nil {
 				item.Value = &NullNode{}
@@ -759,12 +652,11 @@ func (b *builder) buildBlockSequence(preceding *CommentNode) Node {
 	return s
 }
 
-// absorbComments reads own-line comment tokens into b.groups. Contiguous lines (source-line gap of 1) join the
-// current open group; a larger gap closes the current group and starts a new one.
-func (b *builder) absorbComments() {
+// reads own-line comment tokens into b.groups. Contiguous lines join the current open group
+func (b *builder) absorbStandaloneCommentsGroup() {
 	for {
 		t := b.peek()
-		if t == nil || t.Type != token.CommentType {
+		if t == nil || t.Type != tokenizer.CommentType {
 			return
 		}
 		b.advance()
@@ -772,7 +664,7 @@ func (b *builder) absorbComments() {
 			last.Lines = append(last.Lines, t)
 			continue
 		}
-		b.groups = append(b.groups, &CommentNode{Lines: []*token.Token{t}})
+		b.groups = append(b.groups, &CommentNode{Lines: []*tokenizer.Token{t}})
 	}
 }
 
@@ -781,7 +673,7 @@ func (b *builder) absorbComments() {
 // group is left in b.groups for the outer container's next node to claim as its PrecedingComment).
 func (b *builder) trailingEmptiesAtContainerEnd() []Node {
 	next := b.peek()
-	if next == nil || next.Type == token.DocumentEndType || next.Type == token.DocumentHeaderType {
+	if next == nil || next.Type == tokenizer.DocumentEndType || next.Type == tokenizer.DocumentHeaderType {
 		return b.drainGroupsAsEmpties()
 	}
 	return b.drainGroupsAdjacentTo(next.Position.Line)
@@ -803,7 +695,9 @@ func (b *builder) drainGroupsAdjacentTo(nodeLine int) []Node {
 	}
 	empties := make([]Node, 0, split)
 	for _, g := range b.groups[:split] {
-		empties = append(empties, &EmptyNode{PrecedingComment: g})
+		e := &EmptyNode{}
+		e.PrecedingComment = g
+		empties = append(empties, e)
 	}
 	b.groups = b.groups[split:]
 	return empties
@@ -832,7 +726,9 @@ func (b *builder) drainGroupsAsEmpties() []Node {
 	}
 	empties := make([]Node, 0, len(b.groups))
 	for _, g := range b.groups {
-		empties = append(empties, &EmptyNode{PrecedingComment: g})
+		e := &EmptyNode{}
+		e.PrecedingComment = g
+		empties = append(empties, e)
 	}
 	b.groups = b.groups[:0]
 	return empties
@@ -842,10 +738,10 @@ func (b *builder) drainGroupsAsEmpties() []Node {
 // CommentNode. Otherwise returns nil.
 func (b *builder) takeInlineOn(line int) *CommentNode {
 	t := b.peek()
-	if t == nil || t.Type != token.CommentType || t.Position.Line != line {
+	if t == nil || t.Type != tokenizer.CommentType || t.Position.Line != line {
 		return nil
 	}
-	return &CommentNode{Lines: []*token.Token{b.advance()}}
+	return &CommentNode{Lines: []*tokenizer.Token{b.advance()}}
 }
 
 func (b *builder) lastGroup() *CommentNode {

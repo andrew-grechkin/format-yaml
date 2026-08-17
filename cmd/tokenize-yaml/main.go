@@ -22,5 +22,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(2)
 	}
-	fmt.Println(dump.DumpJson(dump.Inspect(lexer.Tokenize(string(src)))))
+
+	fmt.Println(dump.DumpJson(dump.Inspect(lexer.TokenizeNormalized(string(src)))))
 }

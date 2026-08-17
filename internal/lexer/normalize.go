@@ -1,40 +1,66 @@
-// Post-tokenize normalization enforcing our contract with the scanner: each token's Origin holds trailing
-// whitespace/newlines but never leading. Source bytes get partitioned so each belongs to exactly one token, and
-// concatenating all Origins in order reproduces source verbatim (up to any content the scanner drops entirely).
-// Kept in this separate file so lexer.go (a verbatim copy from goccy) stays pristine and easy to diff against
-// upstream if we ever need to re-sync. When we eventually rewrite the scanner to produce trailing-only Origins
-// directly, this pass becomes a no-op and can be deleted.
+// Post-tokenize normalization enforcing our contract with the scanner: a token's Origin may START with same-
+// line indent SPACES but never with a NEWLINE. Any newlines that appeared as leading whitespace on a token
+// get shifted onto the previous token's trailing
 package lexer
 
 import (
 	"github.com/andrew-grechkin/format-yaml/internal/token"
 )
 
-// TokenizeNormalized runs Tokenize and then rebases every token's Origin to hold only trailing whitespace.
-// Preferred entry point for callers building an AST - the invariant "no leading whitespace in Origin" lets the
-// tree emit by simple Origin concatenation with no de-overlap or alignment logic.
 func TokenizeNormalized(src string) token.Tokens {
 	tokens := Tokenize(src)
-	normalizeLeadingWhitespace(tokens)
+	normalizeLeadingNewlines(tokens)
+	absorbUncoveredSourceSuffix(tokens, src)
 	return tokens
 }
 
-// normalizeLeadingWhitespace shifts each token's leading whitespace onto the previous token's trailing. The very
-// first token's leading whitespace stays where it is (nothing before it in source to absorb it). After this pass,
-// concatenating Origins gives back the source bytes the scanner reported without overlap.
-func normalizeLeadingWhitespace(tokens token.Tokens) {
+func normalizeLeadingNewlines(tokens token.Tokens) {
 	for i := 1; i < len(tokens); i++ {
-		origin := tokens[i].Origin
-		lead := 0
-		for lead < len(origin) && isWhitespace(origin[lead]) {
-			lead++
-		}
-		if lead == 0 {
-			continue
-		}
-		tokens[i-1].Origin += origin[:lead]
-		tokens[i].Origin = origin[lead:]
+		prev := tokens[i-1]
+		cur := tokens[i]
+		prev.Origin, cur.Origin = transferLeadingNewlinesUp(prev.Origin, cur.Origin)
+		prev.Origin, cur.Origin = transferTrailingSpacesDown(prev.Origin, cur.Origin)
 	}
 }
 
-func isWhitespace(c byte) bool { return c == ' ' || c == '\t' || c == '\n' || c == '\r' }
+func transferLeadingNewlinesUp(first, second string) (string, string) {
+	var idx int
+	for idx < len(second) && (second[idx] == '\n' || second[idx] == '\r') {
+		idx++
+	}
+
+	leadingNewlines := second[:idx]
+	updatedSecond := second[idx:]
+	updatedFirst := first + leadingNewlines
+
+	return updatedFirst, updatedSecond
+}
+
+func transferTrailingSpacesDown(first, second string) (string, string) {
+	end := len(first)
+	for end > 0 && first[end-1] == ' ' {
+		end--
+	}
+
+	trailingSpaces := first[end:]
+	updatedFirst := first[:end]
+	updatedSecond := trailingSpaces + second
+
+	return updatedFirst, updatedSecond
+}
+
+// absorbUncoveredSourceSuffix appends any source bytes past the concatenation of Origins to the last token's
+// Origin. Goccy's scanner drops trailing whitespace past the final content token (e.g. `a: 1\n` tokenizes with
+// last Origin `1`, not `1\n`); this fixup puts those bytes back so concat = source holds end-to-end.
+func absorbUncoveredSourceSuffix(tokens token.Tokens, src string) {
+	if len(tokens) == 0 {
+		return
+	}
+	covered := 0
+	for _, t := range tokens {
+		covered += len(t.Origin)
+	}
+	if covered < len(src) {
+		tokens[len(tokens)-1].Origin += src[covered:]
+	}
+}

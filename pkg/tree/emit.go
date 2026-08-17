@@ -4,7 +4,11 @@
 // markers for structural characters), concat produces byte-identical source.
 package tree
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/andrew-grechkin/format-yaml/internal/token"
+)
 
 // Emit renders any node as a complete-output byte slice: n.ToString() with a guaranteed trailing `\n` if the
 // output isn't empty and doesn't already end with one. Used for the final write-to-file step. Trailing content
@@ -61,7 +65,7 @@ func (d *DirectiveNode) ToString() string {
 	return sb.String()
 }
 
-func (s *ScalarNode) ToString() string {
+func (s *StringNode) ToString() string {
 	var sb strings.Builder
 	sb.WriteString(commentPrefix(s.PrecedingComment))
 	if s.Header != nil {
@@ -87,6 +91,23 @@ func (s *ScalarNode) ToString() string {
 		sb.WriteString(s.Token.Origin)
 	}
 	sb.WriteString(commentSuffix(s.InlineComment))
+	return sb.String()
+}
+
+func (n *IntNode) ToString() string   { return scalarLeafToString(n.PrecedingComment, n.Token, n.InlineComment) }
+func (n *FloatNode) ToString() string { return scalarLeafToString(n.PrecedingComment, n.Token, n.InlineComment) }
+func (n *BoolNode) ToString() string  { return scalarLeafToString(n.PrecedingComment, n.Token, n.InlineComment) }
+
+// scalarLeafToString is the shared render path for IntNode/FloatNode/BoolNode (and equivalent to the non-block
+// branch of StringNode.ToString). NullNode keeps its own ToString because its Token may be nil (implicit null)
+// which requires a slightly different branch.
+func scalarLeafToString(pre *CommentNode, tok *token.Token, inline *CommentNode) string {
+	var sb strings.Builder
+	sb.WriteString(commentPrefix(pre))
+	if tok != nil {
+		sb.WriteString(tok.Origin)
+	}
+	sb.WriteString(commentSuffix(inline))
 	return sb.String()
 }
 
@@ -155,8 +176,8 @@ func (e *MappingEntry) ToString() string {
 	if e.Value != nil {
 		sb.WriteString(e.Value.ToString())
 	}
-	if e.Comma != nil {
-		sb.WriteString(e.Comma.Origin)
+	if e.Trailer != nil {
+		sb.WriteString(e.Trailer.Origin)
 	}
 	sb.WriteString(commentSuffix(e.InlineComment))
 	return sb.String()
@@ -187,8 +208,8 @@ func (i *SequenceItem) ToString() string {
 	if i.Value != nil {
 		sb.WriteString(i.Value.ToString())
 	}
-	if i.Comma != nil {
-		sb.WriteString(i.Comma.Origin)
+	if i.Trailer != nil {
+		sb.WriteString(i.Trailer.Origin)
 	}
 	sb.WriteString(commentSuffix(i.InlineComment))
 	return sb.String()
