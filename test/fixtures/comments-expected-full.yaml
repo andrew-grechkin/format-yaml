@@ -5,7 +5,6 @@ key2: value
 # comment right between keys
 key3: value
 # comment right after a key
-
 key4: value
 # comment right before a key
 key5: value
@@ -22,4 +21,5 @@ nested:
     y: 20
     # deep foot-of-y candidate
     z: 30
+
 # comment at the end of the doc

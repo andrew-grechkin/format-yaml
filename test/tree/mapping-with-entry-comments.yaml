@@ -1,0 +1,6 @@
+# head of key1
+key1: value1
+# head of key2
+key2: value2  # inline on key2
+# head of key3
+key3: value3

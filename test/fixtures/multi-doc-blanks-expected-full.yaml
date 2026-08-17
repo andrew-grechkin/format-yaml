@@ -10,8 +10,6 @@ key 3: |+
   line
 
 
-...
-
 ---
 key 4: value
 # trailing comment
@@ -22,7 +20,7 @@ key 5: value
 # leading comment
 ---
 key 6: value
-
 # interdoc comment
+
 ---
 key 7: value

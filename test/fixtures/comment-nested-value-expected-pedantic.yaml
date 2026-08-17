@@ -1,0 +1,8 @@
+---
+list: # items
+  - a  # first
+  - b
+
+parent: # why
+  child: 1
+...

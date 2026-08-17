@@ -6,8 +6,6 @@ top_level_keep: |+
   content
 
 
-...
-
 ---
 # Case B -- `|+` is NOT the last entry of the doc.
 # A sibling key at the same indent level terminates the block
@@ -28,8 +26,6 @@ outer:
     content
 
 
-...
-
 ---
 # Case D -- `|+` is nested but a sibling entry breaks the last-entry
 # chain. The following sibling terminates the block, so no `...`
@@ -47,8 +43,6 @@ outer:
 folded_end: >+
   content
 
-
-...
 
 ---
 # Case F -- `|+` carrying exactly 1 trailing newline (no blank line

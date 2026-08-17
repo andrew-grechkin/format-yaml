@@ -25,8 +25,9 @@ key 5: value
 # leading comment
 ---
 key 6: value
-...
 # interdoc comment
+...
+
 ---
 key 7: value
 ...

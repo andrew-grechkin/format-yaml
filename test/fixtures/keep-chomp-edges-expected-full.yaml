@@ -45,8 +45,6 @@ minimal_keep: |+
   content
 
 
-...
-
 ---
 # Case D2 --  `|+` canonicalise to `|`.
 remove_plus: |
@@ -77,8 +75,6 @@ a:
     c: |+
       content
 
-
-...
 
 ---
 # Case G -- folded-scalar value carrying literal leading whitespace.

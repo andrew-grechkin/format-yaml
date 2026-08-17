@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/andrew-grechkin/format-yaml.svg)](https://pkg.go.dev/github.com/andrew-grechkin/format-yaml)
 
-A CLI filter for formatting YAML documents. Highly opinionated but dependency free.
+A CLI filter for formatting YAML documents. Highly opinionated, ships as a single self-contained binary.
 
 > this is a sibling tool to https://github.com/andrew-grechkin/update-yaml
 
@@ -80,7 +80,7 @@ export PATH="${GOBIN:-${GOPATH:-$HOME/go}/bin}:$PATH"
 - Transparent BOM handling: strips UTF-8 BOMs, transcodes UTF-16 (BE/LE) and UTF-32 (BE/LE) payloads to UTF-8 on the fly
 - Normalizes CRLF line endings to LF
 - Round-trip idempotent by construction: `format-yaml < file | format-yaml` produces byte-identical output
-- Ships as a single binary, dependency free
+- Ships as a single self-contained binary (no interpreter or runtime to install)
 - Converts JSON to YAML (side effect)
 
 ## USAGE
@@ -128,14 +128,13 @@ Formatting is cumulative across four modes, selected via `FORMAT_YAML_MODE`:
 
 ## GOTCHAS
 
-### [`github.com/goccy/go-yaml`](https://github.com/goccy/go-yaml/pulls) is FULL of bugs and poorly maintained
+### The scanner is a vendored snapshot of `goccy/go-yaml`'s tokenizer
 
-One can see that there are dozens of pull requests fixing bugs in the library. Maintainers seem just ignore them and
-nothing is being fixed for a long time.
-
-This is a bitter irony because author claimed one of the reasons for this library to exist is [poorly maintained](https://github.com/goccy/go-yaml#why-a-new-library) `go-yaml/yaml`.
-
-I'm trying to [workaround some of the bugs](pkg/patch/goccy.go) in my code, but of course something can slip in.
+Upstream's parser is [buggy and poorly maintained](https://github.com/goccy/go-yaml/pulls) (dozens of fix PRs sit
+unreviewed), so this tool does not use it: the pipeline drives `goccy`'s low-level lexer directly and builds its own
+AST (`pkg/tree`) and emitter. The lexer is vendored verbatim, changing only import paths, under `internal/scanner` and
+`internal/token`. Because that lexer is more permissive than the YAML spec, malformed input can still tokenize; the
+builder validates structure and rejects anything it cannot represent rather than emit a mangled file.
 
 ### `--inplace` is atomic; `-I` is inode-preserving
 
@@ -158,20 +157,19 @@ The two variants make different trade-offs:
 A file that arrived as UTF-16 or UTF-32 is transcoded to UTF-8 on read; CRLF endings become LF. If you need the original
 encoding on disk, convert the formatted output back before writing.
 
-### YAML directives (`%YAML 1.2`, `%TAG …`) are not preserved
+### YAML directives (`%YAML 1.2`, `%TAG …`) are preserved
 
-They're rare and would need directive-aware doc splitting to round-trip cleanly. If your file needs them, don't run this
-tool over it.
+Stream-level directives round-trip through the tree as-is, and comments that sit above a directive stay above it.
 
-### Complex mapping keys (`? [a, b]: value`) are rejected at parse time by the underlying parser
+### Complex mapping keys (`? [a, b]: value`) are rejected at parse time
 
 The tool exits with a clear error; the file is not touched.
 
-### Fuzz-only edge cases exist
+### Pathological YAML may be rejected
 
-Pathological YAML (embedded directive-looking tokens inside plain scalars, alias-like patterns not backed by a real
-anchor) can produce output that goccy's own parser then rejects. Real config files don't hit this - it's a documented
-limit, not a data-loss risk since nothing is written when parsing fails.
+The tree builder only models structures it can round-trip. Exotic input (for example an island comment in a
+position the builder does not yet attribute) makes the tool exit with a clear error rather than write a mangled
+file. Real config files don't hit this, and nothing is written when parsing fails.
 
 ## WHY ANOTHER YAML FORMATTER
 

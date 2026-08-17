@@ -1,50 +1,81 @@
-// The pipeline's byte-in / byte-out core plus the I/O drivers that wrap it (stdin, file batches, in-place variants).
-// Every entry point runs Bytes at its core, guaranteeing an all-or-nothing contract for the caller.
+// The pipeline's byte-in / byte-out core plus the I/O drivers that wrap it (stdin, file batches, in-place
+// variants). Every entry point runs Bytes at its core, guaranteeing an all-or-nothing contract for the caller.
 package format
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 
-	"github.com/goccy/go-yaml/parser"
-
 	"github.com/andrew-grechkin/format-yaml/internal/config"
 	"github.com/andrew-grechkin/format-yaml/internal/encoding"
-	"github.com/andrew-grechkin/format-yaml/internal/passes"
-	"github.com/andrew-grechkin/format-yaml/internal/render"
+	"github.com/andrew-grechkin/format-yaml/pkg/tree"
+	treepasses "github.com/andrew-grechkin/format-yaml/pkg/tree/passes"
 )
 
-// ErrCheckDiff is a sentinel returned by Check* when the input isn't already formatted. main exits 1 silently for it -
-// filenames were already printed to stdout (files case) or the caller only cares about the exit code (stdin case).
+// ErrCheckDiff is a sentinel returned by Check* when the input isn't already formatted. main exits 1 silently
+// for it - filenames were already printed to stdout (files case) or the caller only cares about the exit code
+// (stdin case).
 var ErrCheckDiff = errors.New("check: input would be reformatted")
 
-// Drives the whole pipeline: parse, run mode-cumulative passes over each doc's AST, render into a fresh buffer. Callers
-// only see a complete byte slice or an error - never a half-produced doc.
-func Bytes(src []byte, m config.Mode) ([]byte, error) {
-	src, err := encoding.NormalizeToUTF8(src)
+// Bytes drives the whole pipeline: transcode to UTF-8, build our tree from the in-repo lexer, apply the
+// mode-cumulative pass set, emit. Callers only see a complete byte slice or an error - never a half-produced
+// doc. The builder signals unsupported/malformed input by panicking (so development surfaces gaps loudly);
+// this boundary converts that into the parse-error path main maps to exit 2.
+func Bytes(src []byte, m config.Mode) (out []byte, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			out, err = nil, fmt.Errorf("parse yaml: %v", r)
+		}
+	}()
+
+	src, err = encoding.NormalizeToUTF8(src)
 	if err != nil {
 		return nil, err
 	}
-	file, err := parser.ParseBytes(src, parser.ParseComments)
-	if err != nil {
-		return nil, fmt.Errorf("parse yaml: %w", err)
+	// Output is always LF; normalize Windows line endings before the builder captures Origins verbatim.
+	src = bytes.ReplaceAll(src, []byte("\r\n"), []byte("\n"))
+
+	treepasses.LineWidth = config.LineWidth
+	// standard preserves source blanks (collapsed to one); full discards them and re-derives spacing from
+	// the sorted tree shape.
+	treepasses.KeepSourceBlanks = m < config.ModeFull
+	file := tree.Build(src)
+	treepasses.Apply(file, treePassesFor(m))
+	return tree.Emit(file), nil
+}
+
+// treePassesFor translates format-yaml's Mode enum into the pass bitmap. Modes are cumulative: minimal carries
+// the lossless/one-character changes, standard adds structural layout, full adds the shape-changing passes
+// (block scalars, folding, flow/block conversion, sorting), and pedantic adds the `...` footer.
+func treePassesFor(m config.Mode) treepasses.Set {
+	s := treepasses.UnquoteSafeStrings
+	s |= treepasses.EnsureDocMarker
+	s |= treepasses.NarrowBlockChomp
+	s |= treepasses.NormalizeNulls
+	s |= treepasses.StripTrailingSpace
+
+	if m >= config.ModeStandard {
+		s |= treepasses.EnsureBlankLines
+		s |= treepasses.MaterializeImplicitNulls
+		s |= treepasses.NormalizeIndent
+		s |= treepasses.NormalizeInlineCommentSpacing
+		s |= treepasses.UnflowTopLevel
 	}
-	// Extract doc-level head comments before passes run so the sort pass in full+ mode doesn't drag them along with the
-	// first entry. render.ExtractDocLevelHeadComments handles a nil body via its own type-assertion guard, so no
-	// per-doc nil check needed here.
-	docLevels := make([][]string, len(file.Docs))
-	for i, doc := range file.Docs {
-		docLevels[i] = render.ExtractDocLevelHeadComments(doc)
+
+	if m >= config.ModeFull {
+		s |= treepasses.PreferSingleQuotes
+		s |= treepasses.SortMappingKeys
+		s |= treepasses.BlockScalarizeMultiline
+		s |= treepasses.FoldLongScalars
+		s |= treepasses.UnflowLongFlows
+		s |= treepasses.FlowShortBlocks
+		s |= treepasses.EnsureKeepChompFooter
 	}
-	for _, doc := range file.Docs {
-		if doc.Body == nil {
-			continue
-		}
-		// Fix goccy's head/foot attribution for comments whose physical layout says "foot of previous entry" - the
-		// comment is source-adjacent to entry N with a blank line separating it from entry N+1. Runs before passes so
-		// sort and quote passes see the corrected attribution.
-		render.ReattributeAdjacentHeadComments(doc.Body, src)
-		passes.Apply(doc.Body, m)
+
+	if m >= config.ModePedantic {
+		s |= treepasses.EnsureDocFooter
 	}
-	return render.EmitFile(file, src, m, docLevels), nil
+
+	return s
 }

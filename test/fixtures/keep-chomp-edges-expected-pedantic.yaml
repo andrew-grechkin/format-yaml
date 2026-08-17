@@ -13,7 +13,6 @@ seq_of_blocks:
 
 
   - value
-
 ...
 
 ---
@@ -39,7 +38,6 @@ tail_seq:
 
     other: value
   - second: value
-
 ...
 
 ---

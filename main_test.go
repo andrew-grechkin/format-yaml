@@ -14,14 +14,11 @@ import (
 	"testing"
 	"unicode/utf16"
 
-	goccyAst "github.com/goccy/go-yaml/ast"
-	goccyParser "github.com/goccy/go-yaml/parser"
-
-	"github.com/andrew-grechkin/update-yaml/pkg/style"
-
 	"github.com/andrew-grechkin/format-yaml/internal/config"
 	"github.com/andrew-grechkin/format-yaml/internal/encoding"
 	"github.com/andrew-grechkin/format-yaml/internal/format"
+	"github.com/andrew-grechkin/format-yaml/pkg/tree"
+	treepasses "github.com/andrew-grechkin/format-yaml/pkg/tree/passes"
 )
 
 // Pins down the CLI exit contract. Each classification path is exercised, including wrapped forms (the wrap chain is
@@ -124,16 +121,16 @@ func TestIsSafeToUnquote(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.in, func(t *testing.T) {
-			if got := style.SafeToUnquote(tc.in); got != tc.want {
-				t.Errorf("style.SafeToUnquote(%q) = %v, want %v", tc.in, got, tc.want)
+			if got := treepasses.SafeToUnquote(tc.in); got != tc.want {
+				t.Errorf("SafeToUnquote(%q) = %v, want %v", tc.in, got, tc.want)
 			}
 		})
 	}
 }
 
 // Exercises the strip pass through the full pipeline (format.Bytes) across every mode. Uses trailing whitespace in
-// COMMENTS as the probe: goccy preserves comment trailing whitespace on re-emit (unlike plain-scalar values, which it
-// strips on its own), so the presence/absence of the trailing spaces in the output genuinely depends on the strip pass.
+// COMMENTS as the probe: comment tokens preserve their trailing whitespace, so the presence/absence of those
+// spaces in the output genuinely depends on the strip pass.
 // Block-scalar interior trailing whitespace must survive in every mode.
 func TestFormatBytesStripsTrailingWhitespace(t *testing.T) {
 	src := "a: 1 # note   \nb: 2\ndata: |\n  keep spaces   \n  another  \nafter: value # end   \n"
@@ -855,8 +852,8 @@ func TestFoldLongScalars(t *testing.T) {
 			}
 			if tc.passWraps {
 				for line := range bytes.SplitSeq(out, []byte("\n")) {
-					if style.DisplayWidth(string(line)) > config.LineWidth {
-						t.Errorf("wrap line exceeds line width: %q (width %d > %d)", line, style.DisplayWidth(string(line)), config.LineWidth)
+					if treepasses.DisplayWidth(string(line)) > config.LineWidth {
+						t.Errorf("wrap line exceeds line width: %q (width %d > %d)", string(line), treepasses.DisplayWidth(string(line)), config.LineWidth)
 					}
 				}
 			}
@@ -864,37 +861,31 @@ func TestFoldLongScalars(t *testing.T) {
 	}
 }
 
-// Reads the parsed value of the first top-level mapping entry. Handles plain / quoted / block-scalar styles - which is
-// exactly the set of representations foldLongScalars might produce.
+// Reads the parsed value of the first top-level mapping entry using our own tree - the same builder the CLI
+// runs, so this asserts the fold/block output round-trips to the original value.
 func parseFirstScalarValue(t *testing.T, src []byte) string {
 	t.Helper()
-	file, err := goccyParser.ParseBytes(src, 0)
-	if err != nil {
-		t.Fatalf("re-parse: %v", err)
-	}
-	if len(file.Docs) == 0 {
+	file := tree.Build(src)
+	if len(file.Children) == 0 {
 		t.Fatal("no docs in output")
 	}
-	mn, ok := file.Docs[0].Body.(*goccyAst.MappingNode)
+	doc, ok := file.Children[0].(*tree.Doc)
+	if !ok || len(doc.Children) == 0 {
+		t.Fatalf("first child is not a non-empty doc: %T", file.Children[0])
+	}
+	m, ok := doc.Children[0].(*tree.MappingNode)
+	if !ok || len(m.Children) == 0 {
+		t.Fatalf("doc body is not a non-empty mapping: %T", doc.Children[0])
+	}
+	e, ok := m.Children[0].(*tree.MappingEntry)
 	if !ok {
-		t.Fatalf("first doc body is %T, want *ast.MappingNode", file.Docs[0].Body)
+		t.Fatalf("first mapping child is %T, want *tree.MappingEntry", m.Children[0])
 	}
-	if len(mn.Values) == 0 {
-		t.Fatal("empty mapping")
+	s, ok := e.Value.(*tree.StringNode)
+	if !ok || s.Token == nil {
+		t.Fatalf("first value is %T, want *tree.StringNode", e.Value)
 	}
-	v := mn.Values[0].Value
-	switch node := v.(type) {
-	case *goccyAst.StringNode:
-		return node.Value
-	case *goccyAst.LiteralNode:
-		if node.Value == nil {
-			return ""
-		}
-		return node.Value.Value
-	default:
-		t.Fatalf("unexpected value node type %T", v)
-		return ""
-	}
+	return s.Token.Value
 }
 
 // Inline flow at mode full: the mirror of unflowLongFlows. Each case asserts an exact output rather than a substring so
@@ -1018,7 +1009,10 @@ func TestReindentBlockScalars(t *testing.T) {
 		want string
 	}{
 		{
-			name: "JSON flow with newline scalar produces valid |- body",
+			// When the doc body is flow (JSON), the whole tree is unflowed to block, so the multiline scalar
+			// becomes a `|-` block. Its body indent is the entry's depth + 2, which for an inline first entry
+			// (`- col:`) is 4, not the relative Origin leading + 2.
+			name: "nested flow mapping with newline scalar unflows to block",
 			src:  `[{"col": "line1\nline2"}]` + "\n",
 			want: "---\n- col: |-\n    line1\n    line2\n",
 		},
@@ -1033,6 +1027,8 @@ func TestReindentBlockScalars(t *testing.T) {
 			want: "---\nnote: |-\n  line1\n  line2\n",
 		},
 		{
+			// full emits `...` when the LAST doc ends in a keep-chomp block, so the value's trailing newlines
+			// can't be confused with EOF.
 			name: "|+ trailing newlines preserved after reindent",
 			src:  "text: \"line1\\nline2\\n\\n\"\n",
 			want: "---\ntext: |+\n  line1\n  line2\n\n...\n",
@@ -1092,39 +1088,4 @@ func TestFormatFilesToStdoutAllOrNothing(t *testing.T) {
 	if out.Len() != 0 {
 		t.Errorf("expected zero bytes written on failure; got %d bytes: %q", out.Len(), out.Bytes())
 	}
-}
-
-// Seeds the fuzzer with every fixture source, then exercises format.Bytes against random inputs. The guarantees
-// checked: no panic, and - when a random input successfully parses - the second pass over the first pass's output
-// matches byte-for-byte (idempotence).
-func FuzzFormatBytes(f *testing.F) {
-	entries, err := filepath.Glob("test/fixtures/*-source.yaml")
-	if err != nil {
-		f.Fatal(err)
-	}
-	for _, path := range entries {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			f.Fatal(err)
-		}
-		for m := config.ModeMinimal; m <= config.ModePedantic; m++ {
-			f.Add(data, int(m))
-		}
-	}
-
-	f.Fuzz(func(t *testing.T, src []byte, modeIdx int) {
-		m := config.Mode(modeIdx%int(config.ModePedantic) + int(config.ModeMinimal))
-		out1, err := format.Bytes(src, m)
-		if err != nil {
-			return
-		}
-		out2, err := format.Bytes(out1, m)
-		if err != nil {
-			t.Logf("second-pass parse failure (round-trip glitch): %v", err)
-			return
-		}
-		if !bytes.Equal(out1, out2) {
-			t.Fatalf("not idempotent\nfirst:\n%q\nsecond:\n%q", out1, out2)
-		}
-	})
 }

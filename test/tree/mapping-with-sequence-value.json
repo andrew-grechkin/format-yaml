@@ -1,0 +1,334 @@
+{
+  "File": {
+    "Children": [
+      {
+        "Doc": {
+          "Children": [
+            {
+              "MappingNode": {
+                "Children": [
+                  {
+                    "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ":\n",
+                          "Position": {
+                            "Column": 6,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 1,
+                            "Offset": 6
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
+                      "ExplicitKeyMarker": null,
+                      "Key": {
+                        "StringNode": {
+                          "Header": null,
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
+                            },
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "items",
+                              "Position": {
+                                "Column": 1,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 1,
+                                "Offset": 1
+                              },
+                              "Type": 31,
+                              "Value": "items"
+                            }
+                          },
+                          "Style": 0
+                        }
+                      },
+                      "Trailer": null,
+                      "Value": {
+                        "SequenceNode": {
+                          "Children": [
+                            {
+                              "SequenceItem": {
+                                "Comments": {
+                                  "InlineComment": null,
+                                  "PrecedingComment": null
+                                },
+                                "Marker": {
+                                  "Token": {
+                                    "CharacterType": 0,
+                                    "Error": "",
+                                    "Indicator": 1,
+                                    "Origin": "  -",
+                                    "Position": {
+                                      "Column": 3,
+                                      "IndentLevel": 1,
+                                      "IndentNum": 2,
+                                      "Line": 2,
+                                      "Offset": 10
+                                    },
+                                    "Type": 3,
+                                    "Value": "-"
+                                  }
+                                },
+                                "Trailer": null,
+                                "Value": {
+                                  "StringNode": {
+                                    "Header": null,
+                                    "ScalarBase": {
+                                      "Comments": {
+                                        "InlineComment": null,
+                                        "PrecedingComment": null
+                                      },
+                                      "Token": {
+                                        "CharacterType": 2,
+                                        "Error": "",
+                                        "Indicator": 0,
+                                        "Origin": " alpha\n",
+                                        "Position": {
+                                          "Column": 5,
+                                          "IndentLevel": 1,
+                                          "IndentNum": 2,
+                                          "Line": 2,
+                                          "Offset": 12
+                                        },
+                                        "Type": 31,
+                                        "Value": "alpha"
+                                      }
+                                    },
+                                    "Style": 0
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "SequenceItem": {
+                                "Comments": {
+                                  "InlineComment": null,
+                                  "PrecedingComment": null
+                                },
+                                "Marker": {
+                                  "Token": {
+                                    "CharacterType": 0,
+                                    "Error": "",
+                                    "Indicator": 1,
+                                    "Origin": "  -",
+                                    "Position": {
+                                      "Column": 3,
+                                      "IndentLevel": 1,
+                                      "IndentNum": 2,
+                                      "Line": 3,
+                                      "Offset": 20
+                                    },
+                                    "Type": 3,
+                                    "Value": "-"
+                                  }
+                                },
+                                "Trailer": null,
+                                "Value": {
+                                  "StringNode": {
+                                    "Header": null,
+                                    "ScalarBase": {
+                                      "Comments": {
+                                        "InlineComment": null,
+                                        "PrecedingComment": null
+                                      },
+                                      "Token": {
+                                        "CharacterType": 2,
+                                        "Error": "",
+                                        "Indicator": 0,
+                                        "Origin": " beta\n",
+                                        "Position": {
+                                          "Column": 5,
+                                          "IndentLevel": 1,
+                                          "IndentNum": 2,
+                                          "Line": 3,
+                                          "Offset": 22
+                                        },
+                                        "Type": 31,
+                                        "Value": "beta"
+                                      }
+                                    },
+                                    "Style": 0
+                                  }
+                                }
+                              }
+                            },
+                            {
+                              "SequenceItem": {
+                                "Comments": {
+                                  "InlineComment": null,
+                                  "PrecedingComment": null
+                                },
+                                "Marker": {
+                                  "Token": {
+                                    "CharacterType": 0,
+                                    "Error": "",
+                                    "Indicator": 1,
+                                    "Origin": "  -",
+                                    "Position": {
+                                      "Column": 3,
+                                      "IndentLevel": 1,
+                                      "IndentNum": 2,
+                                      "Line": 4,
+                                      "Offset": 29
+                                    },
+                                    "Type": 3,
+                                    "Value": "-"
+                                  }
+                                },
+                                "Trailer": null,
+                                "Value": {
+                                  "StringNode": {
+                                    "Header": null,
+                                    "ScalarBase": {
+                                      "Comments": {
+                                        "InlineComment": null,
+                                        "PrecedingComment": null
+                                      },
+                                      "Token": {
+                                        "CharacterType": 2,
+                                        "Error": "",
+                                        "Indicator": 0,
+                                        "Origin": " gamma\n",
+                                        "Position": {
+                                          "Column": 5,
+                                          "IndentLevel": 1,
+                                          "IndentNum": 2,
+                                          "Line": 4,
+                                          "Offset": 31
+                                        },
+                                        "Type": 31,
+                                        "Value": "gamma"
+                                      }
+                                    },
+                                    "Style": 0
+                                  }
+                                }
+                              }
+                            }
+                          ],
+                          "Close": null,
+                          "Comments": {
+                            "InlineComment": null,
+                            "PrecedingComment": null
+                          },
+                          "Open": null,
+                          "Style": 0
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "MappingEntry": {
+                      "Colon": {
+                        "Token": {
+                          "CharacterType": 0,
+                          "Error": "",
+                          "Indicator": 1,
+                          "Origin": ":",
+                          "Position": {
+                            "Column": 5,
+                            "IndentLevel": 0,
+                            "IndentNum": 0,
+                            "Line": 5,
+                            "Offset": 41
+                          },
+                          "Type": 5,
+                          "Value": ":"
+                        }
+                      },
+                      "Comments": {
+                        "InlineComment": null,
+                        "PrecedingComment": null
+                      },
+                      "ExplicitKeyMarker": null,
+                      "Key": {
+                        "StringNode": {
+                          "Header": null,
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
+                            },
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": "name",
+                              "Position": {
+                                "Column": 1,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 5,
+                                "Offset": 37
+                              },
+                              "Type": 31,
+                              "Value": "name"
+                            }
+                          },
+                          "Style": 0
+                        }
+                      },
+                      "Trailer": null,
+                      "Value": {
+                        "StringNode": {
+                          "Header": null,
+                          "ScalarBase": {
+                            "Comments": {
+                              "InlineComment": null,
+                              "PrecedingComment": null
+                            },
+                            "Token": {
+                              "CharacterType": 2,
+                              "Error": "",
+                              "Indicator": 0,
+                              "Origin": " outer\n",
+                              "Position": {
+                                "Column": 7,
+                                "IndentLevel": 0,
+                                "IndentNum": 0,
+                                "Line": 5,
+                                "Offset": 43
+                              },
+                              "Type": 31,
+                              "Value": "outer"
+                            }
+                          },
+                          "Style": 0
+                        }
+                      }
+                    }
+                  }
+                ],
+                "Close": null,
+                "Comments": {
+                  "InlineComment": null,
+                  "PrecedingComment": null
+                },
+                "Open": null,
+                "Style": 0
+              }
+            }
+          ],
+          "Footer": null,
+          "Header": null
+        }
+      }
+    ]
+  }
+}

@@ -56,8 +56,8 @@ func main() {
 //   - 3: I/O error (couldn't read, write, stat, or rename a file)
 //
 // I/O classification is done by type-checking the wrap chain for *fs.PathError or *os.LinkError - the two error types
-// every std-lib filesystem call returns. goccy doesn't touch the filesystem, so a parse error can never masquerade as
-// I/O by accident.
+// every std-lib filesystem call returns. The parser never touches the filesystem, so a parse error can never
+// masquerade as I/O by accident.
 func exitCode(err error) int {
 	switch {
 	case err == nil:

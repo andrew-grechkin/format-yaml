@@ -1,0 +1,9 @@
+key1: v1
+
+# island between key1 and key2
+
+key2: v2
+# adjacent to key3
+key3: v3
+
+# trailing island inside mapping

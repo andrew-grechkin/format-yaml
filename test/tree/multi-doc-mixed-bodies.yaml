@@ -1,0 +1,12 @@
+# header of first doc
+---
+key: value
+number: 42
+---
+- alpha
+- beta
+---
+just a scalar
+...
+---
+# comment-only doc has null body

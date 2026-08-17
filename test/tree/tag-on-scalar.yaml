@@ -1,0 +1,3 @@
+version: !!str 42
+timestamp: !!timestamp 2024-01-01
+custom: !mytag value

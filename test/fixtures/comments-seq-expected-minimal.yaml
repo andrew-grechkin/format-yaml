@@ -1,0 +1,14 @@
+# the document header comment
+---
+- name: first
+  role: admin  # inline comment
+- name: second
+  role: user
+# comment between items
+- name: third
+  role: user
+- name: fourth
+  # head-of-role
+  role: guest
+
+# comment at the end of the doc

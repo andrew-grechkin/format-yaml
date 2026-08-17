@@ -1,0 +1,32 @@
+# doc0 pre-header
+---
+# doc0 head
+key: value
+other: 1
+# doc0 trailing on mapping
+
+---
+# doc1 head above sequence
+- alpha
+- beta
+# between seq items
+- gamma
+# doc1 trailing on sequence
+
+---
+- name: first
+  role: admin
+- name: second
+  role: user
+# doc2 trailing on seq-of-maps
+
+---
+outer:
+  inner: 1
+  # inner foot
+  next: 2
+
+# doc3 leading (hoisted above ---)
+---
+# doc4 head-only
+key: 1
