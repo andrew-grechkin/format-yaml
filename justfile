@@ -1,5 +1,7 @@
 #!/usr/bin/env -S just --one --justfile
 
+set export
+
 export tool := 'format-yaml'
 
 # Build the binary to cache directory
@@ -168,7 +170,6 @@ gen-tree-fixtures: build-probe-yaml
 @test-unit:
     go test -v ./...
 
-
 # Run integration tests by driving the binary against fixtures
 test-int: build
     #!/usr/bin/env -S bash -Eeuo pipefail
@@ -267,3 +268,16 @@ test-int-tree: build
 
 # Run all tests
 test: lint test-unit test-int
+
+# watch tests
+[positional-arguments]
+watch recipe *args:
+    #!/usr/bin/env -S bash -Eeuo pipefail
+    shift 1
+    [[ -x "$(command -v inotifywait)" ]] || { echo "inotifywait not found; install inotify-tools" >&2; exit 1; }
+
+    while true; do
+        just "$recipe" "$@" || true
+        echo "--- watching for changes (Ctrl-C to stop) ---" >&2
+        inotifywait -r -q -e modify,create,delete,move --exclude '(^|/)\.git(/|$)' .
+    done
